@@ -31,5 +31,6 @@ bin/
 
 # Ignore IntelliJ IDEA project files
 .idea/
+*.xml
 *.iml
-build/
+oop_project5.iml
