@@ -97,6 +97,17 @@ public class SymbolTable {
             st.assignValue("z", 0.0005);
             st.declareVariable("d","char", '!');
             st.assignValue("flag", false);
+            System.out.println(st.getType("x"));
+            st.getType("y");
+            st.getType("z");
+            st.getType("c");
+            st.getType("d");
+            st.getValue("x");
+            st.getValue("y");
+            st.getValue("z");
+            st.getValue("c");
+            st.getValue("d");
+            System.out.println(st.getType("flag"));
 
             st.enterScope();
             st.declareVariable("x", "int", 5);
@@ -113,37 +124,5 @@ public class SymbolTable {
             System.err.println(e.getMessage());
         }
 
-
-//        try {
-//            System.out.println("Test 1: Declare and retrieve variable");
-//            st.enterScope();
-//            st.declareVariable("x", "int", 5);
-//            System.out.println("x = " + st.getValue("x"));  // Output: 5
-//            st.printSymbolTable();
-//
-//            System.out.println("\nTest 2: Assign new value to variable");
-//            st.assignValue("x", 10);
-//            System.out.println("x = " + st.getValue("x"));  // Output: 10
-//            st.printSymbolTable();
-//
-//            System.out.println("\nTest 3: Enter new scope and shadow variable");
-//            st.enterScope();
-//            st.declareVariable("y", "String", "Hello");
-//            System.out.println("y = " + st.getValue("y"));  // Output: Hello
-//            st.assignValue("x", 20);  // Updates x in outer scope
-//            System.out.println("x = " + st.getValue("x"));  // Output: 20
-//            st.printSymbolTable();
-//
-//            System.out.println("\nTest 4: Exit scope and check variable persistence");
-//            st.exitScope();
-//            System.out.println("x = " + st.getValue("x"));  // Output: 20
-//            st.printSymbolTable();
-//
-//            System.out.println("\nTest 5: Redeclare variable in same scope (should throw exception)");
-//            st.declareVariable("z", "int", 30);  // Error: already declared in scope
-//        } catch (IllegalArgumentException e) {
-//            System.err.println(e.getMessage());
-//        }
-//        System.out.println("\nAll basic tests completed.\n");
     }
 }
