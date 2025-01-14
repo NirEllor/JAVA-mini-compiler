@@ -1,0 +1,2 @@
+public class JavaVerifier {
+}
