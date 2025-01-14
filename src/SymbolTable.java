@@ -107,7 +107,7 @@ public class SymbolTable {
             st.getValue("z");
             st.getValue("c");
             st.getValue("d");
-            System.out.println(st.getType("flag"));
+            System.out.println(st.getValue("flag"));
 
             st.enterScope();
             st.declareVariable("x", "int", 5);
