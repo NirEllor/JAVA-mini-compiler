@@ -2,7 +2,7 @@ import java.util.*;
 
 public class SymbolTable {
     // Outer map: scope number -> (variable name -> (type, value))
-    private final Map<Integer, Map<String, Pair>> scopes = new HashMap<>();
+    private final HashMap<Integer, HashMap<String, Pair>> variablesMap = new HashMap<>();
     private int currentScope = 0;
 
     static class Pair {
@@ -22,16 +22,16 @@ public class SymbolTable {
 
     public void enterScope() {
         currentScope++;
-        scopes.put(currentScope, new HashMap<>());
+        variablesMap.put(currentScope, new HashMap<>());
     }
 
     public void exitScope() {
-        scopes.remove(currentScope);
+        variablesMap.remove(currentScope);
         currentScope--;
     }
 
     public void declareVariable(String name, String type, Object value) {
-        Map<String, Pair> currentScopeMap = scopes.get(currentScope);
+        HashMap<String, Pair> currentScopeMap = variablesMap.get(currentScope);
 
         if (currentScopeMap.containsKey(name)) {
             throw new IllegalArgumentException("Variable '" + name + "' already declared in the current scope");
@@ -42,24 +42,24 @@ public class SymbolTable {
 
     public void assignValue(String name, Object value) {
         int scope = findVariableScope(name);
-        Pair pair = scopes.get(scope).get(name);
+        Pair pair = variablesMap.get(scope).get(name);
         pair.value = value;
     }
 
     public Object getValue(String name) {
         int scope = findVariableScope(name);
-        return scopes.get(scope).get(name).value;
+        return variablesMap.get(scope).get(name).value;
     }
 
     public String getType(String name) {
         int scope = findVariableScope(name);
-        return scopes.get(scope).get(name).type;
+        return variablesMap.get(scope).get(name).type;
     }
 
     // Helper function to find the scope where a variable is declared
     private int findVariableScope(String name) {
         for (int scope = currentScope; scope >= 0; scope--) {
-            if (scopes.containsKey(scope) && scopes.get(scope).containsKey(name)) {
+            if (variablesMap.containsKey(scope) && variablesMap.get(scope).containsKey(name)) {
                 return scope;
             }
         }
@@ -69,8 +69,8 @@ public class SymbolTable {
     // Function to print the symbol table
     public void printSymbolTable() {
         System.out.println("Symbol Table:");
-        for (int scope : scopes.keySet()) {
-            System.out.println("Scope " + scope + ": " + scopes.get(scope));
+        for (int scope : variablesMap.keySet()) {
+            System.out.println("Scope " + scope + ": " + variablesMap.get(scope));
         }
     }
 
