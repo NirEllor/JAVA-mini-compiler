@@ -5,13 +5,14 @@ import java.util.regex.Pattern;
 
 public class Tokenizer {
 
-    private static final String SYMBOLS_REGEX = "[{}()\\[\\].,+-;*/&|<>=~]";
+    private static final String SYMBOLS_REGEX = "[{}()\\[\\].,;&|<>=]";
     private static final Pattern SYMBOLS_PATTERN = Pattern.compile(SYMBOLS_REGEX);
-
+    private static final String INT_REGEX = "^(?:[1-9][0-9]{0,4}|0|32767)$";
+    private static final Pattern INT_PATTERN = Pattern.compile(INT_REGEX);
 
     // Define the regex pattern for splitting tokens
-    private static final String TOKEN_SPLIT = "(\"[^\"]*\"|[" + SYMBOLS_REGEX + "]|\\w+)";
-    private static final String IDENTIFIER_PATTERN = "[A-Za-z]+\\w+";
+    private static final String TOKEN_SPLIT = "(" + SYMBOLS_REGEX + "|\\w+)";
+    private static final String IDENTIFIER_PATTERN = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
 
 
     private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
@@ -79,8 +80,9 @@ public class Tokenizer {
     public String tokenType() {
         if (currentToken == null) return "No current token";
         if (checkKeyword()) return "KEYWORD";
-        if (checkSymbol()) return "SYMBOL";
         if (checkIdentifier()) return "IDENTIFIER";
+        if (checkSymbol()) return "SYMBOL";
+        if (checkIntVal()) return "NUMBER";
         return null;
     }
 
@@ -95,6 +97,10 @@ public class Tokenizer {
 //    public String identifier() {
 //        return checkIdentifier() ? currentToken : null;
 //    }
+
+    public boolean checkIntVal() {
+        return INT_PATTERN.matcher(currentToken).matches();
+    }
 
     private boolean checkSymbol() {
         return SYMBOLS_PATTERN.matcher(currentToken).matches();
@@ -125,12 +131,12 @@ public class Tokenizer {
 //    }
 
     public static void main(String[] args) {
-        List<String> input = new ArrayList<>(List.of("int a1=1; { if }", "func(a,b)"));
+        List<String> input = new ArrayList<>(List.of("int _a1=1; [g]", "func(a,)"));
         Tokenizer tokenizer = new Tokenizer(input);
 
         tokenizer.advance();
         while (tokenizer.currentToken != null) {
-            System.out.println(tokenizer.currentToken);
+            //System.out.println(tokenizer.currentToken);
             System.out.println(tokenizer.currentToken + " " + tokenizer.tokenType());
             tokenizer.advance();
         }
