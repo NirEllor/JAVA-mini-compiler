@@ -7,12 +7,17 @@ public class PreProcessor {
     public String cleanedFilePath = "src/CleanedChatterBot.txt";
     private final FunctionsTable functionsTable;  // Instance of FunctionsTable
     public boolean success = false;
-    String validVariableRegex = "^(?!_+$)(?!_+_+)[a-zA-Z_][a-zA-Z0-9_]*$";
-    String commentREGEX = "^(\\s*//.*|\\s*)$";
-    String validFunctionREGEX = "^void \\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)";
-    Pattern commentPattern = Pattern.compile(commentREGEX);
-    Pattern validFunctionPattern = Pattern.compile(validFunctionREGEX);
-    Pattern validVariablePattern = Pattern.compile(validVariableRegex);
+
+    String VALID_VARIABLE_REGEX = "^(?!_+$)(?!_+_+)[a-zA-Z_][a-zA-Z0-9_]*$";
+    String COMMENT_REGEX = "^(\\s*//.*|\\s*)$";
+    String VALID_FUNCTION_REGEX = "^void ([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)";
+    private static final Set<String> TYPES = new HashSet<>(Arrays.asList(
+            "int", "char", "boolean", "double", "String"));
+
+    public Pattern commentPattern = Pattern.compile(COMMENT_REGEX);
+    public Pattern validFunctionPattern = Pattern.compile(VALID_FUNCTION_REGEX);
+    public Pattern validVariablePattern = Pattern.compile(VALID_VARIABLE_REGEX);
+
 
 
     public PreProcessor(String filePath, FunctionsTable functionsTable) {
@@ -47,6 +52,7 @@ public class PreProcessor {
             String line;
             while ((line = reader.readLine()) != null) {
                 // Collect function names and parameter types
+                line = line.trim();  // Trim leading and trailing whitespace
                 Matcher matcher = validFunctionPattern.matcher(line);
                 while (matcher.find()) {
                     String functionName = matcher.group(1);
@@ -96,7 +102,7 @@ public class PreProcessor {
         for (String param : paramArray) {
             param = param.trim();
             String[] parts = param.split("\\s+");
-            if (parts.length > 1 && validVariablePattern.matcher(parts[1]).matches()) {
+            if (parts.length > 1 && validVariablePattern.matcher(parts[1]).matches() && TYPES.contains(parts[0])) {
                 paramTypes.add(parts[0]);  // Add the type (first part) to the list
             }
         }
@@ -123,7 +129,7 @@ public class PreProcessor {
     }
 
     public static void main(String[] args) {
-        String inputFile = "src/ChatterBot.java";  // Replace with the path to your input file
+            String inputFile = args[0];  // Replace with the path to your input file
         FunctionsTable functionsTable = new FunctionsTable();  // Create an instance of FunctionsTable
         PreProcessor preProcessor = new PreProcessor(inputFile, functionsTable);
 

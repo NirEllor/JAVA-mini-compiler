@@ -8,6 +8,10 @@ class ChatterBot {
     String name;  // Bot's name
     String[] legalRequestsReplies;
     String[] illegalRequestsReplies;
+    void m1() {
+    }
+    void foo(int a, double b, int a, double b, int a, double b, int a, double b) {
+        }
     String getName() {
         return this.name;
     }

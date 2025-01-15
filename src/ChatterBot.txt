@@ -22,7 +22,13 @@ class ChatterBot {
     String[] illegalRequestsReplies;
     // Array to store replies for illegal requests
 
+    void m1() {
 
+    }
+
+    void foo(int a, double b, int a, double b, int a, double b, int a, double b) {
+
+        }
 
     // Method to return the bot's name
     String getName() {
@@ -66,4 +72,5 @@ class ChatterBot {
         return reply.replaceAll(placeholder, replacement);
         // Replace the placeholder with the given replacement and return the result
     }
+
 }
