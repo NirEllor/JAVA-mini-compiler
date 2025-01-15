@@ -7,6 +7,13 @@ public class PreProcessor {
     public String cleanedFilePath = "src/CleanedChatterBot.txt";
     private final FunctionsTable functionsTable;  // Instance of FunctionsTable
     public boolean success = false;
+    String validVariableRegex = "^(?!_+$)(?!_+_+)[a-zA-Z_][a-zA-Z0-9_]*$";
+    String commentREGEX = "^(\\s*//.*|\\s*)$";
+    String validFunctionREGEX = "^void \\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)";
+    Pattern commentPattern = Pattern.compile(commentREGEX);
+    Pattern validFunctionPattern = Pattern.compile(validFunctionREGEX);
+    Pattern validVariablePattern = Pattern.compile(validVariableRegex);
+
 
     public PreProcessor(String filePath, FunctionsTable functionsTable) {
         this.filePath = filePath;
@@ -15,7 +22,6 @@ public class PreProcessor {
 
     // Cleans the file by removing comments and empty lines
     public void cleanFile() throws IOException {
-        Pattern commentPattern = Pattern.compile("^(\\s*//.*|\\s*)$");
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath));
              BufferedWriter writer = new BufferedWriter(new FileWriter(cleanedFilePath))) {
@@ -35,16 +41,18 @@ public class PreProcessor {
 
     // Processes the cleaned file to collect function names and validate parentheses
     public void processCleanedFile() throws IOException {
-        Pattern functionPattern = Pattern.compile("\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)");
         Stack<Character> stack = new Stack<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(cleanedFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 // Collect function names and parameter types
-                Matcher matcher = functionPattern.matcher(line);
+                Matcher matcher = validFunctionPattern.matcher(line);
                 while (matcher.find()) {
                     String functionName = matcher.group(1);
+                    if (isReservedKeyword(functionName)) {
+                        break;
+                    }
                     String params = matcher.group(2);
                     ArrayList<String> paramTypes = parseParameterTypes(params);
                     functionsTable.addFunction(functionName, paramTypes);  // Use FunctionsTable instance
@@ -74,18 +82,21 @@ public class PreProcessor {
         }
     }
 
+    private boolean isReservedKeyword(String functionName) {
+        return functionName.equals("if") || functionName.equals("while");
+    }
+
     // Parses a parameter list and returns an ArrayList of parameter types
     private ArrayList<String> parseParameterTypes(String params) {
         ArrayList<String> paramTypes = new ArrayList<>();
         if (params.trim().isEmpty()) {
             return paramTypes;
         }
-
         String[] paramArray = params.split(",");
         for (String param : paramArray) {
             param = param.trim();
             String[] parts = param.split("\\s+");
-            if (parts.length > 1) {
+            if (parts.length > 1 && validVariablePattern.matcher(parts[1]).matches()) {
                 paramTypes.add(parts[0]);  // Add the type (first part) to the list
             }
         }
