@@ -1,0 +1,36 @@
+import java.util.*;  // Importing the entire java.util package to use Random
+class ChatterBot {
+    static final String REQUEST_PREFIX = "say ";
+    static final String PLACEHOLDER_FOR_REQUESTED_PHRASE = "<phrase>";
+    static final String PLACEHOLDER_FOR_ILLEGAL_REQUEST = "<request>";
+    static final String ECHO = "echo";
+    Random rand = new Random();
+    String name;  // Bot's name
+    String[] legalRequestsReplies;
+    String[] illegalRequestsReplies;
+    String getName() {
+        return this.name;
+    }
+    String replyTo(String statement) {
+        if (statement.startsWith(ECHO)) {
+            return statement.substring(ECHO.length());
+        }
+        if (statement.startsWith(REQUEST_PREFIX)) {
+            return replyToLegalRequest(statement);
+        }
+        return replyToIllegalRequest(statement);
+    }
+    String replyToIllegalRequest(String statement) {
+        return replacePlaceholderInARandomPattern(this.illegalRequestsReplies,
+                PLACEHOLDER_FOR_ILLEGAL_REQUEST, statement);
+    }
+    String replyToLegalRequest(String statement) {
+        return replacePlaceholderInARandomPattern(this.legalRequestsReplies,
+                PLACEHOLDER_FOR_REQUESTED_PHRASE, statement.substring(REQUEST_PREFIX.length()));
+    }
+    String replacePlaceholderInARandomPattern(String[] patterns, String placeholder, String replacement) {
+        int randomIndex = rand.nextInt(patterns.length);
+        String reply = patterns[randomIndex];
+        return reply.replaceAll(placeholder, replacement);
+    }
+}

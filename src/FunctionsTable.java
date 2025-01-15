@@ -6,16 +6,15 @@ public class FunctionsTable {
 
     // Add a new function with its parameters and types
     public void addFunction(String functionName, List<String> parameterTypes) {
-        if (functionsTable.containsKey(functionName)) {
-            throw new IllegalArgumentException("Function '" + functionName + "' already exists");
+        if (!hasFunction(functionName)) {
+            HashMap<Integer, String> parameters = new HashMap<>();
+            for (int i = 0; i < parameterTypes.size(); i++) {
+                parameters.put(i, parameterTypes.get(i));
+            }
+
+            functionsTable.put(functionName, parameters);
         }
 
-        HashMap<Integer, String> parameters = new HashMap<>();
-        for (int i = 0; i < parameterTypes.size(); i++) {
-            parameters.put(i, parameterTypes.get(i));
-        }
-
-        functionsTable.put(functionName, parameters);
     }
 
     // Get the parameter type by function name and parameter index
