@@ -8,7 +8,7 @@ public class PreProcessor {
     private final FunctionsTable functionsTable;  // Instance of FunctionsTable
     public boolean success = false;
 
-    String VALID_VARIABLE_REGEX = "^(?!_+$)(?!_+_+)[a-zA-Z_][a-zA-Z0-9_]*$";
+    String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
     String COMMENT_REGEX = "^(\\s*//.*|\\s*)$";
     String VALID_FUNCTION_REGEX = "^void ([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)";
     private static final Set<String> TYPES = new HashSet<>(Arrays.asList(
