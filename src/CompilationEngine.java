@@ -132,6 +132,9 @@ public class CompilationEngine {
 
     private void verifyInt(boolean isConstant) throws InavlidVariableName,
             InvalidVariableDeclarationException, InvalidIntValueException {
+        int a = 5, b = 7;
+
+        // currently token = int
         tokenizer.advance(); // move to name
         String variableName = verifyVariableName();
         tokenizer.advance(); // move to "="
