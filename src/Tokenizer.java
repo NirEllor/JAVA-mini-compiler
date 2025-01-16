@@ -73,7 +73,7 @@ public class Tokenizer {
                     break;
                 }
             }
-            if (!currentToken.isBlank()) break;
+            if (!currentToken.isEmpty()) break;
         }
     }
 
