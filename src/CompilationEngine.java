@@ -26,11 +26,11 @@ public class CompilationEngine {
             verifyFile();
             System.out.println("0");
         } catch (IOException e){
-            System.out.println(e.getMessage());
             System.out.println("2");
-        } catch (GlobalScopeException e) {
             System.out.println(e.getMessage());
+        } catch (GlobalScopeException e) {
             System.out.println("1");
+            System.err.println(e.getMessage());
         }
 
     }
