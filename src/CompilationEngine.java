@@ -13,6 +13,8 @@ public class CompilationEngine {
     public static final String VOID = "void";
     public static final String FINAL = "final";
     public static final String EQUALS = "=";
+    public static final String EOL_COMMA = ";";
+    public static final String COMMA = ",";
 
     private SymbolTable variablesTable;
     public static final String INT = "int";
@@ -132,22 +134,40 @@ public class CompilationEngine {
 
     private void verifyInt(boolean isConstant) throws InavlidVariableName,
             InvalidVariableDeclarationException, InvalidIntValueException {
-        int a = 5, b = 7;
-
         // currently token = int
         tokenizer.advance(); // move to name
-        String variableName = verifyVariableName();
-        tokenizer.advance(); // move to "="
-        verifyEqualSign(variableName);
-        tokenizer.advance(); // move to value
+        while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
+            String variableName = verifyVariableName();
+            tokenizer.advance(); // move to "="
+            verifyEqualSign(variableName);
+            tokenizer.advance(); // move to value
 
-        String variableValue = tokenizer.getCurrentToken();
-        Matcher intMatcher = validIntPattern.matcher(variableValue);
-        if (!intMatcher.matches()) {
-            throw new InvalidIntValueException(variableName, variableValue);
+            String variableValue = tokenizer.getCurrentToken();
+            Matcher intMatcher = validIntPattern.matcher(variableValue);
+            if (!intMatcher.matches()) {
+                throw new InvalidIntValueException(variableName, variableValue);
+            }
+            tokenizer.advance(); // move to the end of expression / more vars declaration
+            boolean endOrMoreSuccess = verifyManyVariableDeclarations(variableName);
+            variablesTable.declareVariable(variableValue, "int", variableValue, isConstant);
+            if (!endOrMoreSuccess) {
+                break;
+            } else {
+                tokenizer.advance();
+            }
         }
+    }
 
-
+    private boolean verifyManyVariableDeclarations(String variableName) throws InvalidVariableDeclarationException {
+        if (tokenizer.getCurrentToken().equals(EOL_COMMA)) {
+            return false;
+        } else if (tokenizer.getCurrentToken().equals(COMMA)) {
+            tokenizer.advance();
+            return true;
+        }
+        else {
+            throw new InvalidVariableDeclarationException(variableName);
+        }
     }
 
     private void verifyEqualSign(String variableName) throws InvalidVariableDeclarationException {
