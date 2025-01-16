@@ -35,18 +35,21 @@ public class CompilationEngine {
     }
 
     private void verifyFile() throws GlobalScopeException {
+
         String token = tokenizer.getCurrentToken();
         variablesTable.enterScope();
         int currentScope;
+
         while (token != null) {
+
             System.out.println(token);
             currentScope = variablesTable.getCurrentScope();
+
             if (TYPES.contains(token)) {
                 verifyVariableDeclaration();
             } else if (token.equals(FINAL)) {
                 verifyConstant();
-            }
-         else if (token.equals(VOID)) {
+            } else if (token.equals(VOID)) {
                 verifyFunctionDeclaration();
             } else if ( currentScope == 1 &&
                     variablesTable.getVariablesMap().get(currentScope).containsKey(token) ) {
@@ -54,6 +57,7 @@ public class CompilationEngine {
             } else {
                 throw new GlobalScopeException();
             }
+
             token = tokenizer.getCurrentToken();
         }
     }
