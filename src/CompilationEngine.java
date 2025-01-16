@@ -14,15 +14,21 @@ public class CompilationEngine {
     public static final String FINAL = "final";
     public static final String EQUALS = "=";
     public static final String SPACE = " ";
-    private Tokenizer tokenizer;
+
     private SymbolTable variablesTable;
     public static final String INT = "int";
     public static final String CHAR = "char";
     public static final String BOOLEAN = "boolean";
     public static final String DOUBLE = "double";
     public static final String STRING = "String";
-    String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
+
+    public String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
+    public static final String VALID_INT_REGEX = "^-?\\d+$";
+
     public Pattern validVariablePattern = Pattern.compile(VALID_VARIABLE_REGEX);
+    public Pattern validIntPattern = Pattern.compile(VALID_INT_REGEX);
+
+    private Tokenizer tokenizer;
 
     private static final Set<String> TYPES = new HashSet<>(Arrays.asList(
             INT, CHAR, BOOLEAN, DOUBLE, STRING));
@@ -40,14 +46,17 @@ public class CompilationEngine {
         } catch (IOException e){
             System.out.println("2");
             System.out.println(e.getMessage());
-        } catch (GlobalScopeException | InavlidVariableName | InvalidVariableDeclarationException e) {
+        } catch (GlobalScopeException |
+                 InavlidVariableName |
+                 InvalidVariableDeclarationException |
+                 InvalidIntValueException e) {
             System.out.println("1");
             System.err.println(e.getMessage());
         }
 
     }
 
-    private void verifyFile() throws GlobalScopeException, InavlidVariableName, InvalidVariableDeclarationException {
+    private void verifyFile() throws GlobalScopeException, InavlidVariableName, InvalidVariableDeclarationException, InvalidIntValueException {
 
         String token = tokenizer.getCurrentToken();
         variablesTable.enterScope();
@@ -88,8 +97,8 @@ public class CompilationEngine {
 
     }
 
-    private void verifyVariableDeclaration(String token, boolean isConstant) throws InavlidVariableName, InvalidVariableDeclarationException {
-        tokenizer.advance(); // To get to the type of the variable
+    private void verifyVariableDeclaration(String token, boolean isConstant) throws InavlidVariableName, InvalidVariableDeclarationException, InvalidIntValueException {
+        // Whether final or not, now the token is on the type
         
         switch (token) {
             case INT:
@@ -123,14 +132,23 @@ public class CompilationEngine {
     private void verifyChar(boolean isConstant) {
     }
 
-    private void verifyInt(boolean isConstant) throws InavlidVariableName, InvalidVariableDeclarationException {
-        final  int   a    =    5  ;
-        int    b    = 6  ;
+    private void verifyInt(boolean isConstant) throws InavlidVariableName, InvalidVariableDeclarationException, InvalidIntValueException {
+        b    = 6  ;
+        tokenizer.advance(); // pass the type
+        passAllSpaces();
         String variableName = verifyVariableName();
         // If reached here, variable name is valid
         tokenizer.advance();
+        passAllSpaces(); // move until "=" is reached
         if (!Objects.equals(tokenizer.getCurrentToken(), EQUALS)) {
             throw new InvalidVariableDeclarationException(variableName);
+        }
+        tokenizer.advance();
+        passAllSpaces(); // move until value is reached
+        String variableValue = tokenizer.getCurrentToken();
+        Matcher intMatcher = validIntPattern.matcher(variableValue);
+        if (!intMatcher.matches()) {
+            throw new InvalidIntValueException(variableName, variableValue);
         }
 
 
