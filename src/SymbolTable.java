@@ -25,6 +25,13 @@ public class SymbolTable {
         variablesMap.put(currentScope, new HashMap<>());
     }
 
+    public int getCurrentScope() {
+        return currentScope;
+    }
+
+    public HashMap<Integer, HashMap<String, Pair>> getVariablesMap() {
+        return variablesMap;
+    }
     public void exitScope() {
         variablesMap.remove(currentScope);
         currentScope--;

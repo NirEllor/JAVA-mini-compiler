@@ -9,7 +9,7 @@ public class CompilationEngine {
 
     public static final String VOID = "void";
     private Tokenizer tokenizer;
-    private SymbolTable symbolTable;
+    private SymbolTable variablesTable;
     private FunctionsTable functionsTable;
     private static final Set<String> TYPES = new HashSet<>(Arrays.asList(
             "int", "char", "boolean", "double", "String"));
@@ -20,26 +20,38 @@ public class CompilationEngine {
         {
             String[] listOfLines = bufferedReader.lines().toArray(String[]::new);
             this.tokenizer = new Tokenizer(listOfLines);
-            this.symbolTable = new SymbolTable();
+            this.variablesTable = new SymbolTable();
             this.functionsTable = functionsTable;
             verifyFile();
             tokenizer.advance();
 //            System.out.println(tokenizer.getCurrentToken());
         } catch (IOException e){
             System.out.println(e.getMessage());
+            System.out.println("2");
+        } catch (GlobalScopeException e) {
+            System.out.println(e.getMessage());
+            System.out.println("1");
         }
 
     }
 
-    private void verifyFile() {
+    private void verifyFile() throws GlobalScopeException {
         String token = tokenizer.getCurrentToken();
+        variablesTable.enterScope();
+        int currentScope = variablesTable.getCurrentScope();
         while (token != null) {
             if (TYPES.contains(token)) {
                 verifyVariableDeclaration();
             } else if (token.equals(VOID)) {
                 verifyFunctionDeclaration();
-            } else if () {
-                
+            } else if (functionsTable.hasFunction(token)) {
+                //TODO - check if relevant
+                verifyFunctionCall();
+            } else if ( currentScope == 1 &&
+                    variablesTable.getVariablesMap().get(currentScope).containsKey(token) ) {
+                verifyVariableAssignment();
+            } else {
+                throw new GlobalScopeException();
             }
         }
     }
