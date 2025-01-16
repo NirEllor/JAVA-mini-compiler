@@ -77,6 +77,8 @@ public class PreProcessor {
                     }
                 }
             }
+        } catch (FunctionException e) {
+            System.out.println(e.getMessage());
         }
 
         if (!stack.isEmpty()) {
