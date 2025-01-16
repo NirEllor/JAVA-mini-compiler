@@ -11,6 +11,8 @@ public class PreProcessor {
     String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
     String COMMENT_REGEX = "^(\\s*//.*|\\s*)$";
     String VALID_FUNCTION_REGEX = "^void ([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)";
+    String VALID_FUNCTION_CALL_REGEX = "([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)";
+
     private static final Set<String> TYPES = new HashSet<>(Arrays.asList(
             "int", "char", "boolean", "double", "String"));
 
@@ -51,7 +53,7 @@ public class PreProcessor {
         try (BufferedReader reader = new BufferedReader(new FileReader(cleanedFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                // Collect function names and parameter types
+                //TODO: must end with one of the following suffixes
                 line = line.trim();  // Trim leading and trailing whitespace
                 Matcher matcher = validFunctionPattern.matcher(line);
                 while (matcher.find()) {
