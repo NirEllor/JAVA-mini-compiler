@@ -1,11 +1,14 @@
 public class InvalidVariableDeclarationException extends Exception {
     final String variableName;
-    public InvalidVariableDeclarationException(String variableName) {
+    private final String currentToken;
+
+    public InvalidVariableDeclarationException(String variableName, String currentToken) {
         this.variableName = variableName;
+        this.currentToken = currentToken;
     }
 
     @Override
     public String getMessage() {
-        return "The variable " + variableName + " declaration is invalid";
+        return "Unexpected token '" + currentToken + "' after variable: " + variableName;
     }
 }

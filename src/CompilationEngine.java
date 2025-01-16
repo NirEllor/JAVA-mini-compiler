@@ -15,6 +15,8 @@ public class CompilationEngine {
     public static final String EQUALS = "=";
     public static final String EOL_COMMA = ";";
     public static final String COMMA = ",";
+    public static final String FALSE = "false";
+    public static final String TRUE = "true";
 
     private SymbolTable variablesTable;
     public static final String INT = "int";
@@ -23,11 +25,18 @@ public class CompilationEngine {
     public static final String DOUBLE = "double";
     public static final String STRING = "String";
 
-    public String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
-    public static final String VALID_INT_REGEX = "^-?\\d+$";
+    private static final String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
+    public static final String VALID_INT_REGEX = "^[+-]?\\d+$";
+    public static final String VALID_CHAR_REGEX = "^'([^']|)'$";
+    public static final String VALID_DOUBLE_REGEX = "^[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?$\n";
+    public static final String VALID_STRING_REGEX = "^\".*\"$";
 
     public Pattern validVariablePattern = Pattern.compile(VALID_VARIABLE_REGEX);
     public Pattern validIntPattern = Pattern.compile(VALID_INT_REGEX);
+    public Pattern validCharPattern = Pattern.compile(VALID_CHAR_REGEX);
+    public Pattern validDoublePattern = Pattern.compile(VALID_DOUBLE_REGEX);
+    public Pattern validStringPattern = Pattern.compile(VALID_STRING_REGEX);
+
 
     private Tokenizer tokenizer;
 
@@ -50,14 +59,15 @@ public class CompilationEngine {
         } catch (GlobalScopeException |
                  InavlidVariableName |
                  InvalidVariableDeclarationException |
-                 InvalidIntValueException e) {
+                 InvalidValueException |
+                InvalidTypeException e) {
             System.out.println("1");
             System.err.println(e.getMessage());
         }
 
     }
 
-    private void verifyFile() throws GlobalScopeException, InavlidVariableName, InvalidVariableDeclarationException, InvalidIntValueException {
+    private void verifyFile() throws GlobalScopeException, InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException {
 
         String token = tokenizer.getCurrentToken();
         variablesTable.enterScope();
@@ -97,83 +107,101 @@ public class CompilationEngine {
 
     }
 
-    private void verifyVariableDeclaration(String token, boolean isConstant) throws InavlidVariableName, InvalidVariableDeclarationException, InvalidIntValueException {
+    private void verifyVariableDeclaration(String token, boolean isConstant) throws InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException {
         // Whether final or not, now the token is on the type
         
         switch (token) {
             case INT:
-                verifyInt(isConstant);
+                verifyVariableType(INT, validIntPattern, isConstant);
                 break;
             case CHAR:
-                verifyChar(isConstant);
+                verifyVariableType(CHAR, validCharPattern, isConstant);
                 break;
             case BOOLEAN:
-                verifyBoolean(isConstant);
+                verifyVariableType(BOOLEAN, null, isConstant);
                 break;
             case DOUBLE:
-                verifyDouble(isConstant);
+                verifyVariableType(DOUBLE, validDoublePattern, isConstant);
                 break;
             case STRING:
-                verifyString(isConstant);
+                verifyVariableType(STRING, validStringPattern, isConstant);
                 break;
         }
     }
+    
 
-    private void verifyString(boolean isConstant) {
-
-    }
-
-    private void verifyDouble(boolean isConstant) {
-    }
-
-    private void verifyBoolean(boolean isConstant) {
-    }
-
-    private void verifyChar(boolean isConstant) {
-    }
-
-    private void verifyInt(boolean isConstant) throws InavlidVariableName,
-            InvalidVariableDeclarationException, InvalidIntValueException {
-        // currently token = int
-        tokenizer.advance(); // move to name
+    private void verifyVariableType(String type, Pattern valuePattern, boolean isConstant)
+            throws InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException {
+        tokenizer.advance(); // Move to variable name
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
+            // Validate the variable name
             String variableName = verifyVariableName();
-            tokenizer.advance(); // move to "="
-            verifyEqualSign(variableName);
-            tokenizer.advance(); // move to value
 
+            tokenizer.advance(); // Move to "="
+            verifyEqualSign(variableName);
+
+            tokenizer.advance(); // Move to value
             String variableValue = tokenizer.getCurrentToken();
-            Matcher intMatcher = validIntPattern.matcher(variableValue);
-            if (!intMatcher.matches()) {
-                throw new InvalidIntValueException(variableName, variableValue);
+
+            if (validVariablePattern.matcher(variableValue).matches()) {
+                String valueType = variablesTable.getType(variableValue);
+                boolean isCorrectType = compareTypes(type, valueType);
+                if (!isCorrectType) {
+                    throw new InvalidTypeException(variableName, type, valueType);
+                }
+            } else {
+                // Validate the value
+                if (type.equals(BOOLEAN)) {
+                    verifyBoolValue(variableName, variableValue);
+                } else {
+                    Matcher valueMatcher = valuePattern.matcher(variableValue);
+                    if (!valueMatcher.matches()) {
+                        throw new InvalidValueException(variableName, variableValue);
+                    }
+                }
             }
-            tokenizer.advance(); // move to the end of expression / more vars declaration
+
+            // Add the variable to the symbol table
+            tokenizer.advance(); // Move past the value
             boolean endOrMoreSuccess = verifyManyVariableDeclarations(variableName);
-            variablesTable.declareVariable(variableValue, "int", variableValue, isConstant);
+            variablesTable.declareVariable(variableName, type, variableValue, isConstant);
+
             if (!endOrMoreSuccess) {
                 break;
             } else {
-                tokenizer.advance();
+                tokenizer.advance(); // Move to the next variable name
             }
         }
     }
 
+    private boolean compareTypes(String type, String valueType) {
+        return true;
+    }
+
+    private void verifyBoolValue(String variableName, String variableValue) throws InvalidValueException {
+        if ((!variableValue.equals(TRUE)) && (!variableValue.equals(FALSE))) {
+            throw new InvalidValueException(variableName, variableValue);
+        }
+    }
+
+
     private boolean verifyManyVariableDeclarations(String variableName) throws InvalidVariableDeclarationException {
-        if (tokenizer.getCurrentToken().equals(EOL_COMMA)) {
+        String currentToken = tokenizer.getCurrentToken();
+        if (currentToken.equals(EOL_COMMA)) {
             return false;
-        } else if (tokenizer.getCurrentToken().equals(COMMA)) {
+        } else if (currentToken.equals(COMMA)) {
             tokenizer.advance();
             return true;
         }
         else {
-            throw new InvalidVariableDeclarationException(variableName);
+            throw new InvalidVariableDeclarationException(variableName, currentToken);
         }
     }
 
     private void verifyEqualSign(String variableName) throws InvalidVariableDeclarationException {
         String currentToken = tokenizer.getCurrentToken();
         if (!Objects.equals(currentToken, EQUALS)) {
-            throw new InvalidVariableDeclarationException(variableName);
+            throw new InvalidVariableDeclarationException(variableName, currentToken);
         }
     }
 

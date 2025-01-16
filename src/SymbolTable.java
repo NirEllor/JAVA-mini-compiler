@@ -88,33 +88,47 @@ public class SymbolTable {
     }
 
     public static void main(String[] args) {
-        SymbolTable st = new SymbolTable();
-        runTests(st);
+        SymbolTable symbolTable = new SymbolTable();
+        runTests(symbolTable);
     }
 
-    // Test suite for the key functions
     public static void runTests(SymbolTable st) {
-
         try {
+            // Test 1: Declare a constant variable
             st.enterScope();
             st.declareVariable("x", "int", 1, true);
-//            System.out.println(st.findVariableScope("x"));
-            st.assignValue("x", 2);
+            System.out.println("Declared constant x in scope 1");
+
+            // Test 2: Attempt reassignment to a constant variable
+            try {
+                st.assignValue("x", 2); // Expected to throw
+            } catch (ConstantAssignmentException e) {
+                System.err.println(e.getMessage()); // Ignored for testing purposes
+            }
+
+            // Test 3: Declare and assign in nested scope
             st.enterScope();
-            st.declareVariable("x", "int", 1, true);
-//            System.out.println(st.findVariableScope("x"));
-//            st.exitScope();
-//            System.out.println(st.findVariableScope("x"));
-//            st.declareVariable("x", "float", 2);
-            st.assignValue("y", 2);
+            st.declareVariable("y", "String", "hello", false);
+            System.out.println("Declared y in scope 2");
+            st.assignValue("y", "world");
+            System.out.println("Assigned new value to y in scope 2: " + st.getValue("y"));
 
+            // Test 4: Shadowing variable in a nested scope
+            int y = 5;
+            st.declareVariable("x", "int", y, false);
+            System.out.println("Declared x in scope 2 (shadowed)");
+//            st.assignValue("x", 20);
+            System.out.println("Assigned new value to x in scope 2: " + st.getValue("x"));
 
+            // Test 5: Exit scope and access variable from parent scope
+            st.exitScope();
+            System.out.println("Exited scope 2");
+            System.out.println("Value of x in scope 1: " + st.getValue("x"));
+
+        } catch (Exception e) {
+            // Catch-all for unexpected issues
+            System.err.println("Test encountered an unexpected error: " + e.getMessage());
         }
-        catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-        } catch (ConstantAssignmentException e) {
-            throw new RuntimeException(e);
-        }
-
     }
+
 }

@@ -1,29 +1,10 @@
-// A very complex test
-//I am just a comment
-//int a = 5;
-//final int b = 3;
-
 final double PI = 3.14;
-
-final char c = 'b';
-
-// comment
-
-void foo() {
-	while(true) {
-		if (boo(1,2,3,"S")) {
-			doo();
-		}
-	}
-
-	return;
-}
-
-void boo(int a, int b, int c1, String d) {
-	char e = c;
-	return;
-}
-
-void doo(int a1, int a2) {
-	return;
-}
+double a, b;
+int i1, i2 = 6;
+char c='Z', f;
+boolean a, b ,c , d = true, e, f = 5;
+String a = "hello" , b = "goodbye";
+int g = 5;
+int h = g;
+float fl = 000;
+boolean flag1, flag2 = 1, 0.1;

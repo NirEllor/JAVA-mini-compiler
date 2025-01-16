@@ -1,9 +1,9 @@
-public class InvalidIntValueException extends Exception {
+public class InvalidValueException extends Exception {
 
     private final String variableName;
     private final String currentToken;
 
-    public InvalidIntValueException(String variableName, String currentToken) {
+    public InvalidValueException(String variableName, String currentToken) {
         this.variableName = variableName;
         this.currentToken = currentToken;
     }
