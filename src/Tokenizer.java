@@ -15,23 +15,23 @@ public class Tokenizer {
     private static final String IDENTIFIER_PATTERN = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
 
 
-    private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList(
-            "int", "char", "boolean", "void", "true", "false", "null", "if", "else", "while", "return"));
+    private static final Set<String> KEYWORDS = new HashSet<>(Arrays.asList("int", "char",
+            "boolean", "void", "true", "false", "null", "if", "else", "while", "return", "double", "String"));
 
-    private final List<String> inputCleanedLines;
+    private final String[] inputCleanedLines;
     private int lineIndex;
     private List<String> tokensList;
     private String currentToken;
     //private Object[] lookAheadBuffer;
 
-    public Tokenizer(List<String> inputStream) {
+    public Tokenizer(String[] inputStream) {
         this.inputCleanedLines = inputStream;
         this.lineIndex = 0;
         this.tokensList = new ArrayList<>();
         this.currentToken = null;
         //this.lookAheadBuffer = null;
-        if (!inputCleanedLines.isEmpty()) {
-            this.tokensList = getTokensFromLine(inputCleanedLines.get(lineIndex));
+        if (inputCleanedLines.length != 0) {
+            this.tokensList = getTokensFromLine(inputCleanedLines[lineIndex]);
         }
     }
 
@@ -51,7 +51,7 @@ public class Tokenizer {
 
 
     public boolean hasMoreTokens() {
-        return !tokensList.isEmpty() || lineIndex < inputCleanedLines.size() - 1;
+        return !tokensList.isEmpty() || lineIndex < inputCleanedLines.length - 1;
     }
 
     public void advance() {
@@ -65,8 +65,8 @@ public class Tokenizer {
                 currentToken = tokensList.remove(0);
             } else {
                 lineIndex++;
-                if (lineIndex < inputCleanedLines.size()) {
-                    tokensList = getTokensFromLine(inputCleanedLines.get(lineIndex));
+                if (lineIndex < inputCleanedLines.length) {
+                    tokensList = getTokensFromLine(inputCleanedLines[lineIndex]);
                     continue;
                 } else {
                     currentToken = null;
@@ -84,6 +84,10 @@ public class Tokenizer {
         if (checkSymbol()) return "SYMBOL";
         if (checkIntVal()) return "NUMBER";
         return null;
+    }
+
+    public String getCurrentToken() {
+        return currentToken;
     }
 
 //    public String keyword() {
@@ -131,7 +135,7 @@ public class Tokenizer {
 //    }
 
     public static void main(String[] args) {
-        List<String> input = new ArrayList<>(List.of("int _a1=1; [g]", "func(a,)"));
+        String[] input = new String[]{"int _a1=1; [g]", "func(a,)"};
         Tokenizer tokenizer = new Tokenizer(input);
 
         tokenizer.advance();

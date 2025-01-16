@@ -122,14 +122,13 @@ public class PreProcessor {
             cleanFile();
             processCleanedFile();
         } catch (IOException e) {
-            e.printStackTrace();
-            cleanedFilePath = "preprocessor failed";
+            cleanedFilePath = "";
         }
         return cleanedFilePath;
     }
 
     public static void main(String[] args) {
-            String inputFile = args[0];  // Replace with the path to your input file
+        String inputFile = args[0];  // Replace with the path to your input file
         FunctionsTable functionsTable = new FunctionsTable();  // Create an instance of FunctionsTable
         PreProcessor preProcessor = new PreProcessor(inputFile, functionsTable);
 
