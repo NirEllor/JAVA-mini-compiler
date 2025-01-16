@@ -22,9 +22,9 @@ public class CompilationEngine {
             this.tokenizer = new Tokenizer(listOfLines);
             this.variablesTable = new SymbolTable();
             this.functionsTable = functionsTable;
-            verifyFile();
             tokenizer.advance();
-//            System.out.println(tokenizer.getCurrentToken());
+            verifyFile();
+            System.out.println("0");
         } catch (IOException e){
             System.out.println(e.getMessage());
             System.out.println("2");
@@ -35,11 +35,12 @@ public class CompilationEngine {
 
     }
 
-    private void verifyFile() throws GlobalScopeException {
+    private int verifyFile() throws GlobalScopeException {
         String token = tokenizer.getCurrentToken();
         variablesTable.enterScope();
-        int currentScope = variablesTable.getCurrentScope();
+        int currentScope;
         while (token != null) {
+            currentScope = variablesTable.getCurrentScope();
             if (TYPES.contains(token)) {
                 verifyVariableDeclaration();
             } else if (token.equals(VOID)) {
@@ -53,6 +54,7 @@ public class CompilationEngine {
             } else {
                 throw new GlobalScopeException();
             }
+            token = tokenizer.getCurrentToken();
         }
     }
 
