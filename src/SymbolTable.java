@@ -1,17 +1,19 @@
 import java.util.*;
 
 public class SymbolTable {
-    // Outer map: scope number -> (variable name -> (type, value))
-    private final HashMap<Integer, HashMap<String, Pair>> variablesMap = new HashMap<>();
+    // Outer map: scope number -> (variable name -> (type, value, is constant))
+    private final HashMap<Integer, HashMap<String, Triple>> variablesMap = new HashMap<>();
     private int currentScope = 0;
 
-    static class Pair {
+    static class Triple {
         String type;
         Object value;
+        boolean isConstant;
 
-        Pair(String type, Object value) {
+        Triple(String type, Object value, boolean isConstant) {
             this.type = type;
             this.value = value;
+            this.isConstant = isConstant;
         }
 
         @Override
@@ -29,7 +31,7 @@ public class SymbolTable {
         return currentScope;
     }
 
-    public HashMap<Integer, HashMap<String, Pair>> getVariablesMap() {
+    public HashMap<Integer, HashMap<String, Triple>> getVariablesMap() {
         return variablesMap;
     }
     public void exitScope() {
@@ -37,20 +39,23 @@ public class SymbolTable {
         currentScope--;
     }
 
-    public void declareVariable(String name, String type, Object value) {
-        HashMap<String, Pair> currentScopeMap = variablesMap.get(currentScope);
+    public void declareVariable(String name, String type, Object value, boolean isConstant) {
+        HashMap<String, Triple> currentScopeMap = variablesMap.get(currentScope);
 
         if (currentScopeMap.containsKey(name)) {
             throw new IllegalArgumentException("Variable '" + name + "' already declared in the current scope");
         }
 
-        currentScopeMap.put(name, new Pair(type, value));
+        currentScopeMap.put(name, new Triple(type, value, isConstant));
     }
 
-    public void assignValue(String name, Object value) {
+    public void assignValue(String name, Object value) throws ConstantAssignmentException {
         int scope = findVariableScope(name);
-        Pair pair = variablesMap.get(scope).get(name);
-        pair.value = value;
+        if (variablesMap.get(scope).get(name).isConstant) {
+            throw new ConstantAssignmentException(name);
+        }
+        Triple Triple = variablesMap.get(scope).get(name);
+        Triple.value = value;
     }
 
     public Object getValue(String name) {
@@ -92,10 +97,11 @@ public class SymbolTable {
 
         try {
             st.enterScope();
-            st.declareVariable("x", "int", 1);
+            st.declareVariable("x", "int", 1, true);
 //            System.out.println(st.findVariableScope("x"));
+            st.assignValue("x", 2);
             st.enterScope();
-            st.declareVariable("x", "int", 1);
+            st.declareVariable("x", "int", 1, true);
 //            System.out.println(st.findVariableScope("x"));
 //            st.exitScope();
 //            System.out.println(st.findVariableScope("x"));
@@ -106,6 +112,8 @@ public class SymbolTable {
         }
         catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
+        } catch (ConstantAssignmentException e) {
+            throw new RuntimeException(e);
         }
 
     }
