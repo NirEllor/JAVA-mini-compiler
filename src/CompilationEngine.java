@@ -13,7 +13,6 @@ public class CompilationEngine {
     public static final String VOID = "void";
     public static final String FINAL = "final";
     public static final String EQUALS = "=";
-    public static final String SPACE = " ";
 
     private SymbolTable variablesTable;
     public static final String INT = "int";
@@ -71,7 +70,6 @@ public class CompilationEngine {
                 verifyVariableDeclaration(token, false);
             } else if (token.equals(FINAL)) {
                 tokenizer.advance();
-                passAllSpaces();
                 verifyVariableDeclaration(token, true);
             } else if (token.equals(VOID)) {
                 verifyFunctionDeclaration();
@@ -132,19 +130,14 @@ public class CompilationEngine {
     private void verifyChar(boolean isConstant) {
     }
 
-    private void verifyInt(boolean isConstant) throws InavlidVariableName, InvalidVariableDeclarationException, InvalidIntValueException {
-        b    = 6  ;
-        tokenizer.advance(); // pass the type
-        passAllSpaces();
+    private void verifyInt(boolean isConstant) throws InavlidVariableName,
+            InvalidVariableDeclarationException, InvalidIntValueException {
+        tokenizer.advance(); // move to name
         String variableName = verifyVariableName();
-        // If reached here, variable name is valid
-        tokenizer.advance();
-        passAllSpaces(); // move until "=" is reached
-        if (!Objects.equals(tokenizer.getCurrentToken(), EQUALS)) {
-            throw new InvalidVariableDeclarationException(variableName);
-        }
-        tokenizer.advance();
-        passAllSpaces(); // move until value is reached
+        tokenizer.advance(); // move to "="
+        verifyEqualSign(variableName);
+        tokenizer.advance(); // move to value
+
         String variableValue = tokenizer.getCurrentToken();
         Matcher intMatcher = validIntPattern.matcher(variableValue);
         if (!intMatcher.matches()) {
@@ -154,14 +147,16 @@ public class CompilationEngine {
 
     }
 
-    private void passAllSpaces() {
-        while (tokenizer.getCurrentToken().equals(SPACE)) {
-            tokenizer.advance();
+    private void verifyEqualSign(String variableName) throws InvalidVariableDeclarationException {
+        String currentToken = tokenizer.getCurrentToken();
+        if (!Objects.equals(currentToken, EQUALS)) {
+            throw new InvalidVariableDeclarationException(variableName);
         }
     }
 
+
+
     private String verifyVariableName() throws InavlidVariableName {
-        tokenizer.advance();
         String currentToken = tokenizer.getCurrentToken();
         Matcher variableMatcher = validVariablePattern.matcher(currentToken);
         if (!variableMatcher.find()) {
