@@ -1,4 +1,4 @@
-public class GlobalScopeException extends Throwable {
+public class GlobalScopeException extends Exception {
     public GlobalScopeException() {
         super();
     }

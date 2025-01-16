@@ -35,7 +35,7 @@ public class CompilationEngine {
 
     }
 
-    private int verifyFile() throws GlobalScopeException {
+    private void verifyFile() throws GlobalScopeException {
         String token = tokenizer.getCurrentToken();
         variablesTable.enterScope();
         int currentScope;

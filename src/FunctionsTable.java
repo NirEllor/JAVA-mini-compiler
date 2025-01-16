@@ -5,7 +5,7 @@ public class FunctionsTable {
     private final HashMap<String, HashMap<Integer, String>> functionsTable = new HashMap<>();
 
     // Add a new function with its parameters and types
-    public void addFunction(String functionName, List<String> parameterTypes) {
+    public void addFunction(String functionName, List<String> parameterTypes) throws FunctionException {
         if (!hasFunction(functionName)) {
             HashMap<Integer, String> parameters = new HashMap<>();
             for (int i = 0; i < parameterTypes.size(); i++) {
@@ -13,6 +13,9 @@ public class FunctionsTable {
             }
 
             functionsTable.put(functionName, parameters);
+        }
+        else {
+            throw new FunctionException(functionName);
         }
 
     }
@@ -58,7 +61,7 @@ public class FunctionsTable {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FunctionException {
         FunctionsTable ft = new FunctionsTable();
 
         // Test 1: Add functions and print table
