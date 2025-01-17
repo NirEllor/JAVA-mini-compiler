@@ -61,6 +61,18 @@ public class FunctionsTable {
         }
     }
 
+    public boolean checkIfFunctionExist(String functionName){
+
+        return functionsTable.containsKey(functionName);
+
+    }
+
+    public HashMap<Integer, String> getFunctionVariables(String functionName){
+
+        return functionsTable.get(functionName);
+
+    }
+
     public static void main(String[] args) throws FunctionException {
         FunctionsTable ft = new FunctionsTable();
 

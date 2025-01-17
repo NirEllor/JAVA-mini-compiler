@@ -22,14 +22,14 @@ public class Tokenizer {
     private int lineIndex;
     private List<String> tokensList;
     private String currentToken;
-    //private Object[] lookAheadBuffer;
+    private Object[] lookAheadBuffer;
 
     public Tokenizer(String[] inputStream) {
         this.inputCleanedLines = inputStream;
         this.lineIndex = 0;
         this.tokensList = new ArrayList<>();
         this.currentToken = null;
-        //this.lookAheadBuffer = null;
+        this.lookAheadBuffer = null;
         if (inputCleanedLines.length != 0) {
             this.tokensList = getTokensFromLine(inputCleanedLines[lineIndex]);
         }
@@ -118,21 +118,21 @@ public class Tokenizer {
         return currentToken.matches(IDENTIFIER_PATTERN);
     }
 
-//    public void lookAhead() {
-//        if (lookAheadBuffer == null) {
-//            lookAheadBuffer = new Object[]{lineIndex, new ArrayList<>(tokensList), currentToken};
-//        }
-//        advance();
-//    }
-//
-//    public void retreat() {
-//        if (lookAheadBuffer != null) {
-//            lineIndex = (int) lookAheadBuffer[0];
-//            tokensList = (List<String>) lookAheadBuffer[1];
-//            currentToken = (String) lookAheadBuffer[2];
-//            lookAheadBuffer = null;
-//        }
-//    }
+    public void lookAhead() {
+        if (lookAheadBuffer == null) {
+            lookAheadBuffer = new Object[]{lineIndex, new ArrayList<>(tokensList), currentToken};
+        }
+        advance();
+    }
+
+    public void retreat() {
+        if (lookAheadBuffer != null) {
+            lineIndex = (int) lookAheadBuffer[0];
+            tokensList = (List<String>) lookAheadBuffer[1];
+            currentToken = (String) lookAheadBuffer[2];
+            lookAheadBuffer = null;
+        }
+    }
 
     public static void main(String[] args) {
         String[] input = new String[]{"int _a1=1; [g]", "func(a,)"};
