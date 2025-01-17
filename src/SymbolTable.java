@@ -60,6 +60,10 @@ public class SymbolTable {
 
     public String getValue(String name) {
         int scope = findVariableScope(name);
+        Object res = variablesMap.get(scope).get(name).value;
+        if (res == null) {
+            return null;
+        }
         return (String) variablesMap.get(scope).get(name).value;
     }
 

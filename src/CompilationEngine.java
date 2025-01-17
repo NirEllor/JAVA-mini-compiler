@@ -35,6 +35,7 @@ public class CompilationEngine {
     public static final String RETURN = "return";
     public static final String BRACKET_OPENING = "(";
     public static final String KEYWORD = "KEYWORD";
+    private static final String IDENTIFIER = "IDENTIFIER";
 
     private static final String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
     public static final String VALID_INT_REGEX = "^[+-]?\\d+$";
@@ -79,14 +80,20 @@ public class CompilationEngine {
                  NonExistingFunctionException |
                  IllegalReturnFormat |
                  NumberOfVarsInFuncCallException |
-                 MissingVariableTypeInFunctionDeclarationException e) {
+                 MissingVariableTypeInFunctionDeclarationException |
+                 CallFunctionFromGlobalException |
+                 NonExistingVariableException |
+                 IllegalBlockInGlobalScope |
+                 IllegalVarTypeInConditionException |
+                 UninitializedVariableInConditionException |
+                 IllegalConditionException e) {
             System.out.println("1");
             System.err.println(e.getMessage());
         }
 
     }
 
-    private void verifyFile() throws GlobalScopeException, InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException, FinalReturnException, InnerMethodDeclarationException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException {
+    private void verifyFile() throws GlobalScopeException, InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException, FinalReturnException, InnerMethodDeclarationException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, CallFunctionFromGlobalException, IllegalBlockInGlobalScope, NonExistingVariableException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
 
         String token = tokenizer.getCurrentToken();
         variablesTable.enterScope();
@@ -107,8 +114,17 @@ public class CompilationEngine {
             } else if ( currentScope == END_OF_LINE &&
                     (variablesTable.isVariableDeclared(token) != 0) ) {
                 verifyVariableAssignment();
+            } else if (functionTable.checkIfFunctionExist(token)) {
+                tokenizer.lookAhead();
+                if (tokenizer.getCurrentToken().equals(BRACKET_OPENING)) {
+                    throw new CallFunctionFromGlobalException(token);
+                }
+            } else if (token.equals(WHILE) || token.equals(IF)) {
+                throw new IllegalBlockInGlobalScope(token);
+            } else if (tokenizer.tokenType().equals(IDENTIFIER)) {
+                throw new NonExistingVariableException(token);
             } else {
-                throw new GlobalScopeException();
+                    throw new GlobalScopeException();
             }
 
             token = tokenizer.getCurrentToken();
@@ -122,7 +138,7 @@ public class CompilationEngine {
     }
 
     private void verifyFunctionDeclaration() throws InavlidVariableName, InvalidValueException,
-            InvalidVariableDeclarationException, InnerMethodDeclarationException, FinalReturnException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException {
+            InvalidVariableDeclarationException, InnerMethodDeclarationException, FinalReturnException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
         boolean returnFlag = false;
         //Now token is void so move to function name
         tokenizer.advance();
@@ -140,32 +156,25 @@ public class CompilationEngine {
         while (!currToken.equals(BRACE_CLOSING))
         {
 
-            varOrFunctionCallCase(currToken);
+            if (!varOrFunctionCallCase(currToken)) {
 
-            if (TYPES.contains(currToken)) {
-                // Local variable declaration case
-                verifyVariableDeclaration(currToken, false);
-            }
-
-            if (currToken.equals(IF)) {
-                // If block case
-                verifyIfBlock();
-            }
-
-            if (currToken.equals(WHILE)) {
-                // While block case
-                verifyWhileBlock();
-            }
-
-            if (currToken.equals(RETURN)) {
-                // Return statement
-                returnFlag = verifyReturnStatement();
-            }
-
-            // Method declaration inside another method error
-            if (currToken.equals(VOID)) {
-                // Raise inner method declaration error
-                throw new InnerMethodDeclarationException();
+                if (TYPES.contains(currToken)) {
+                    // Local variable declaration case
+                    verifyVariableDeclaration(currToken, false);
+                } else if (currToken.equals(IF)) {
+                    // If block case
+                    verifyBlock(IF);
+                } else if (currToken.equals(WHILE)) {
+                    // While block case
+                    verifyBlock(WHILE);
+                } else if (currToken.equals(RETURN)) {
+                    // Return statement
+                    returnFlag = verifyReturnStatement();
+                } else if (currToken.equals(VOID)) {
+                    // Method declaration inside another method error
+                    // Raise inner method declaration error
+                    throw new InnerMethodDeclarationException();
+                }
             }
 
             //TODO: How to check that the closing } is in separated row? maybe is preProcessor?
@@ -181,7 +190,7 @@ public class CompilationEngine {
 
     }
 
-    private void varOrFunctionCallCase(String currToken) throws InavlidVariableName, NonExistingFunctionException, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException {
+    private boolean varOrFunctionCallCase(String currToken) throws InavlidVariableName, NonExistingFunctionException, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException {
         String nextToken;
         if (verifyVariableName().equals(currToken)) {
             tokenizer.lookAhead();
@@ -200,15 +209,73 @@ public class CompilationEngine {
                 tokenizer.retreat();
                 verifyVariableAssignment();
             }
+            return true;
+        }
+
+        return false;
+    }
+
+    private void verifyBlock(String blockType) throws InavlidVariableName, InvalidValueException, InnerMethodDeclarationException, InvalidVariableDeclarationException, NonExistingFunctionException, MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
+        // Advance to (
+        tokenizer.advance();
+        // Verify the condition + advance to)
+        verifyBlockCondition(blockType);
+        // Advance to {
+        tokenizer.advance();
+        // Advance to verify the inner part of the block
+        verifyInnerPartOfBlock();
+    }
+
+    private void verifyInnerPartOfBlock() throws InnerMethodDeclarationException, InavlidVariableName, InvalidValueException, InvalidVariableDeclarationException, NonExistingFunctionException, MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
+        String currToken = tokenizer.getCurrentToken();
+        if (!varOrFunctionCallCase(currToken)) {
+            if (TYPES.contains(currToken)) {
+                // Local variable declaration case
+                verifyVariableDeclaration(currToken, false);
+            } else if (currToken.equals(IF)) {
+                // If block case
+                verifyBlock(IF);
+            } else if (currToken.equals(WHILE)) {
+                // While block case
+                verifyBlock(WHILE);
+            } else if (currToken.equals(VOID)) {
+                // Method declaration inside another method error
+                // Raise inner method declaration error
+                throw new InnerMethodDeclarationException();
+            }
         }
     }
 
-    private void verifyWhileBlock() {
+    private void verifyBlockCondition(String blockType) throws IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
+        do {
+            verifyBlockConditionCases(blockType);
+        } while (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING));
     }
 
-    private void verifyIfBlock() {
+    private void verifyBlockConditionCases(String blockType) throws IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
+        String token = tokenizer.getCurrentToken();
+        if (token.equals("||") ||
+                token.equals("&&")) {
+            tokenizer.advance();
+        } else if (token.equals("true") ||
+                token.equals("false")) {
+            // Case 1 : One of the reserved words is true or false.
+            tokenizer.advance();
+        } else if (variablesTable.isVariableDeclared(token) > 0) {
+            // Case 2 : An initialized boolean, double or int variable
+            String varType = variablesTable.getType(token);
+            if (!varType.equals(BOOLEAN) && !varType.equals(DOUBLE) && !varType.equals(INT)) {
+                throw new IllegalVarTypeInConditionException(varType, blockType);
+            } else if (variablesTable.getValue(token) == null) {
+                // Check with nir if a variable without assignment is initialized with null
+                throw new UninitializedVariableInConditionException(token, blockType);
+            }
+        } else if ((!validDoublePattern.matcher(token).matches()) &&
+                (!validIntPattern.matcher(token).matches())) {
+            // Case 3 : A double or int constant/value (e.g. 5, -3, -21.5).
+            throw new IllegalConditionException(blockType);
+        }
     }
-
 
     private boolean verifyReturnStatement() throws IllegalReturnFormat {
         // Check legal return
@@ -270,6 +337,7 @@ public class CompilationEngine {
 
     }
 
+    //TODO : maybe ask nir how to handle
     private void verifyFunctionCallVariables(String funcName) throws MissingVariableTypeInFunctionDeclarationException {
 
         // Missing type case
@@ -367,6 +435,7 @@ public class CompilationEngine {
                 && !validDoublePattern.matcher(variableValue).matches()) {
             throw new InvalidValueException(variableName, variableValue);
         }
+        // TODO : Dont we need to add here - !validIntPattern.matcher(variableValue).matches() - ?
     }
 
     private boolean verifyManyVariableDeclarations(String variableName) throws InvalidVariableDeclarationException {
