@@ -45,12 +45,15 @@ public class SymbolTable {
         if (currentScopeMap.containsKey(name)) {
             throw new IllegalArgumentException("Variable '" + name + "' already declared in the current scope");
         }
+        if (isConstant && value == null) {
+            throw new IllegalArgumentException("Final (constant) variable cannot be null");
+        }
 
         currentScopeMap.put(name, new Triple(type, value, isConstant));
     }
 
     public void assignValue(String name, Object value) throws ConstantAssignmentException {
-        int scope = findVariableScope(name);
+        int scope = findVariableScope(name); // might throw if not assigned
         if (variablesMap.get(scope).get(name).isConstant) {
             throw new ConstantAssignmentException(name);
         }

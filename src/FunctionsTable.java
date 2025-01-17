@@ -61,11 +61,7 @@ public class FunctionsTable {
         }
     }
 
-    public boolean checkIfFunctionExist(String functionName){
 
-        return functionsTable.containsKey(functionName);
-
-    }
 
     public HashMap<Integer, String> getFunctionVariables(String functionName){
 
