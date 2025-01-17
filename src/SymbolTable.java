@@ -31,9 +31,6 @@ public class SymbolTable {
         return currentScope;
     }
 
-    public HashMap<Integer, HashMap<String, Triple>> getVariablesMap() {
-        return variablesMap;
-    }
     public void exitScope() {
         variablesMap.remove(currentScope);
         currentScope--;
@@ -46,7 +43,7 @@ public class SymbolTable {
             throw new IllegalArgumentException("Variable '" + name + "' already declared in the current scope");
         }
         if (isConstant && value == null) {
-            throw new IllegalArgumentException("Final (constant) variable cannot be null");
+            throw new IllegalArgumentException("Constant variable cannot be null");
         }
 
         currentScopeMap.put(name, new Triple(type, value, isConstant));
@@ -85,6 +82,11 @@ public class SymbolTable {
         return 0;
     }
 
+    public boolean isConstant(String name) {
+        int scope = findVariableScope(name);
+        return variablesMap.get(scope).get(name).isConstant;
+    }
+
     // Helper function to find the scope where a variable is declared
     public int findVariableScope(String name) {
         for (int scope = currentScope; scope >= 1; scope--) {
@@ -96,13 +98,6 @@ public class SymbolTable {
         throw new IllegalArgumentException("Variable '" + name + "' not declared in any accessible scope");
     }
 
-    // Function to print the symbol table
-    public void printSymbolTable() {
-        System.out.println("Symbol Table:");
-        for (int scope : variablesMap.keySet()) {
-            System.out.println("Scope " + scope + ": " + variablesMap.get(scope));
-        }
-    }
 
     public static void main(String[] args) {
         SymbolTable symbolTable = new SymbolTable();
