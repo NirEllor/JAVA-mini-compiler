@@ -3,7 +3,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +16,9 @@ public class CompilationEngine {
     public static final String COMMA = ",";
     public static final String FALSE = "false";
     public static final String TRUE = "true";
+    public static final int HAS_VALUE = 0;
+    public static final int END_OF_LINE = 1;
+    public static final int MORE_VARIABLES = 2;
 
     private SymbolTable variablesTable;
     public static final String INT = "int";
@@ -27,8 +29,8 @@ public class CompilationEngine {
 
     private static final String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
     public static final String VALID_INT_REGEX = "^[+-]?\\d+$";
-    public static final String VALID_CHAR_REGEX = "^'([^']|)'$";
-    public static final String VALID_DOUBLE_REGEX = "^[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?$\n";
+    public static final String VALID_CHAR_REGEX = "^'[^']'$";
+    public static final String VALID_DOUBLE_REGEX = "^[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?$";
     public static final String VALID_STRING_REGEX = "^\".*\"$";
 
     public Pattern validVariablePattern = Pattern.compile(VALID_VARIABLE_REGEX);
@@ -85,8 +87,8 @@ public class CompilationEngine {
                 verifyVariableDeclaration(token, true);
             } else if (token.equals(VOID)) {
                 verifyFunctionDeclaration();
-            } else if ( currentScope == 1 &&
-                    variablesTable.getVariablesMap().get(currentScope).containsKey(token) ) {
+            } else if ( currentScope == END_OF_LINE &&
+                    (variablesTable.isVariableDeclared(token) != 0) ) {
                 verifyVariableAssignment();
             } else {
                 throw new GlobalScopeException();
@@ -107,82 +109,92 @@ public class CompilationEngine {
 
     }
 
-    private void verifyVariableDeclaration(String token, boolean isConstant) throws InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException {
+    private void verifyVariableDeclaration(String token, boolean isConstant) throws InavlidVariableName,
+            InvalidVariableDeclarationException, InvalidValueException {
         // Whether final or not, now the token is on the type
         
         switch (token) {
             case INT:
-                verifyVariableType(INT, validIntPattern, isConstant);
+                verifyVariable(INT, validIntPattern, isConstant);
                 break;
             case CHAR:
-                verifyVariableType(CHAR, validCharPattern, isConstant);
+                verifyVariable(CHAR, validCharPattern, isConstant);
                 break;
             case BOOLEAN:
-                verifyVariableType(BOOLEAN, null, isConstant);
+                verifyVariable(BOOLEAN, null, isConstant);
                 break;
             case DOUBLE:
-                verifyVariableType(DOUBLE, validDoublePattern, isConstant);
+                verifyVariable(DOUBLE, validDoublePattern, isConstant);
                 break;
             case STRING:
-                verifyVariableType(STRING, validStringPattern, isConstant);
+                verifyVariable(STRING, validStringPattern, isConstant);
                 break;
         }
+        tokenizer.advance();
     }
-    
 
-    private void verifyVariableType(String type, Pattern valuePattern, boolean isConstant)
-            throws InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException {
-        tokenizer.advance(); // Move to variable name
+    private void verifyVariable(String type, Pattern valuePattern, boolean isConstant)
+            throws InvalidVariableDeclarationException, InvalidValueException, InavlidVariableName {
+        tokenizer.advance(); // Move to the variable name
+
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
-            // Validate the variable name
+            // Validate and process the variable name
             String variableName = verifyVariableName();
 
             tokenizer.advance(); // Move to "="
-            verifyEqualSign(variableName);
+            int valueStatus = verifyEqualSign(variableName, type, isConstant);
 
-            tokenizer.advance(); // Move to value
-            String variableValue = tokenizer.getCurrentToken();
-
-            if (validVariablePattern.matcher(variableValue).matches()) {
-                String valueType = variablesTable.getType(variableValue);
-                boolean isCorrectType = compareTypes(type, valueType);
-                if (!isCorrectType) {
-                    throw new InvalidTypeException(variableName, type, valueType);
-                }
-            } else {
-                // Validate the value
-                if (type.equals(BOOLEAN)) {
-                    verifyBoolValue(variableName, variableValue);
-                } else {
-                    Matcher valueMatcher = valuePattern.matcher(variableValue);
-                    if (!valueMatcher.matches()) {
-                        throw new InvalidValueException(variableName, variableValue);
-                    }
-                }
-            }
-
-            // Add the variable to the symbol table
-            tokenizer.advance(); // Move past the value
-            boolean endOrMoreSuccess = verifyManyVariableDeclarations(variableName);
-            variablesTable.declareVariable(variableName, type, variableValue, isConstant);
-
-            if (!endOrMoreSuccess) {
+            if (valueStatus == HAS_VALUE) {
+                processVariableWithValue(variableName, type, valuePattern, isConstant);
+            } else if (valueStatus == END_OF_LINE) {
                 break;
-            } else {
+            } else if (valueStatus == MORE_VARIABLES) {
                 tokenizer.advance(); // Move to the next variable name
             }
         }
     }
 
-    private boolean compareTypes(String type, String valueType) {
-        return true;
+    private void processVariableWithValue(String variableName, String type, Pattern valuePattern, boolean isConstant)
+            throws InvalidValueException {
+        tokenizer.advance(); // Move to the value
+        String variableValue = tokenizer.getCurrentToken();
+
+        // Handle references if the value matches a variable pattern
+        if (validVariablePattern.matcher(variableValue).matches()) {
+            variableValue = resolveVariableReference(variableValue);
+        }
+
+        // Validate the value
+        validateVariableValue(variableName, type, valuePattern, variableValue);
+
+        // Add the variable to the symbol table
+        variablesTable.declareVariable(variableName, type, variableValue, isConstant);
+
+        tokenizer.advance(); // Move past the value
     }
 
-    private void verifyBoolValue(String variableName, String variableValue) throws InvalidValueException {
-        if ((!variableValue.equals(TRUE)) && (!variableValue.equals(FALSE))) {
+    private String resolveVariableReference(String variableValue) {
+        variablesTable.findVariableScope(variableValue); // Throws if the variable doesn't exist
+        return variablesTable.getValue(variableValue);
+    }
+
+    private void validateVariableValue(String variableName, String type, Pattern valuePattern, String variableValue)
+            throws InvalidValueException {
+        if (type.equals(BOOLEAN)) {
+            handleBooleanValues(variableName, variableValue);
+        } else if (!valuePattern.matcher(variableValue).matches()) {
             throw new InvalidValueException(variableName, variableValue);
         }
     }
+
+
+    private void handleBooleanValues(String variableName, String variableValue) throws InvalidValueException {
+        if (!variableValue.equals(TRUE) && !variableValue.equals(FALSE)
+                && !validDoublePattern.matcher(variableValue).matches()) {
+            throw new InvalidValueException(variableName, variableValue);
+        }
+    }
+
 
 
     private boolean verifyManyVariableDeclarations(String variableName) throws InvalidVariableDeclarationException {
@@ -198,10 +210,27 @@ public class CompilationEngine {
         }
     }
 
-    private void verifyEqualSign(String variableName) throws InvalidVariableDeclarationException {
+    private int verifyEqualSign(String variableName, String type, boolean isConstant) throws InvalidVariableDeclarationException {
         String currentToken = tokenizer.getCurrentToken();
-        if (!Objects.equals(currentToken, EQUALS)) {
-            throw new InvalidVariableDeclarationException(variableName, currentToken);
+
+        // Handle assignment
+        switch (currentToken) {
+            case EQUALS:
+                return HAS_VALUE;
+
+            // Handle end of line or single declaration (int a;)
+            case EOL_COMMA:
+                variablesTable.declareVariable(variableName, type, null, isConstant);
+                return END_OF_LINE;
+
+            // Handle multiple variable declarations (int a, b;)
+            case COMMA:
+                variablesTable.declareVariable(variableName, type, null, isConstant);
+                return MORE_VARIABLES;
+
+            // Unexpected token
+            default:
+                throw new InvalidVariableDeclarationException(variableName, currentToken);
         }
     }
 

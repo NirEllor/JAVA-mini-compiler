@@ -58,9 +58,9 @@ public class SymbolTable {
         Triple.value = value;
     }
 
-    public Object getValue(String name) {
+    public String getValue(String name) {
         int scope = findVariableScope(name);
-        return variablesMap.get(scope).get(name).value;
+        return (String) variablesMap.get(scope).get(name).value;
     }
 
     public String getType(String name) {
@@ -68,8 +68,18 @@ public class SymbolTable {
         return variablesMap.get(scope).get(name).type;
     }
 
+    public int isVariableDeclared(String name) {
+        for (int scope = currentScope; scope >= 1; scope--) {
+            System.out.println(scope);
+            if (variablesMap.containsKey(scope) && variablesMap.get(scope).containsKey(name)) {
+                return scope;
+            }
+        }
+        return 0;
+    }
+
     // Helper function to find the scope where a variable is declared
-    private int findVariableScope(String name) {
+    public int findVariableScope(String name) {
         for (int scope = currentScope; scope >= 1; scope--) {
             System.out.println(scope);
             if (variablesMap.containsKey(scope) && variablesMap.get(scope).containsKey(name)) {
