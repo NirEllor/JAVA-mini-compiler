@@ -2,7 +2,7 @@ public class EndOfLineException extends Exception {
     private final String line;
 
     public EndOfLineException(String line) {
-        super();
+//        super();
         this.line = line;
     }
 

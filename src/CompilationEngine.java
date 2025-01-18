@@ -416,7 +416,6 @@ public class CompilationEngine {
 
             // Validate and process the variable name
             String variableName = verifyVariableName();
-            System.out.println("before = " + variableName);
             tokenizer.advance(); // Move to "="
             int valueStatus = verifyEqualSign(variableName, type, isConstant);
 
@@ -500,7 +499,6 @@ public class CompilationEngine {
                 return END_OF_LINE;
             case COMMA:
                 tokenizer.advance();
-                System.out.println(tokenizer.getCurrentToken());
                 return MORE_VARIABLES;
             default:
                 throw new InvalidVariableDeclarationException(variableName, currentToken);
