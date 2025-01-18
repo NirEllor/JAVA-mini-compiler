@@ -94,7 +94,6 @@ public class CompilationEngine {
 
         while (token != null) {
 
-            System.out.println(token);
             currentScope = variablesTable.getCurrentScope();
 
             if (TYPES.contains(token)) {
@@ -374,7 +373,6 @@ public class CompilationEngine {
             String type = variablesTable.getType(variableName);
             boolean isConstant = variablesTable.isConstant(variableName);
             variableName = verifyVariableName();
-
             tokenizer.advance(); // Move to "="
 
             // check if variables were not assigned (e.g: a = ;, a = ,)
@@ -418,7 +416,7 @@ public class CompilationEngine {
 
             // Validate and process the variable name
             String variableName = verifyVariableName();
-
+            System.out.println("before = " + variableName);
             tokenizer.advance(); // Move to "="
             int valueStatus = verifyEqualSign(variableName, type, isConstant);
 
@@ -441,14 +439,21 @@ public class CompilationEngine {
     private int processVariableWithValue(String variableName, String type, Pattern valuePattern, boolean isConstant, boolean isAssignment)
             throws InvalidValueException, InvalidVariableDeclarationException, ConstantAssignmentException {
         tokenizer.advance(); // Move to the value
+
         String variableValue = tokenizer.getCurrentToken();
 
         // Handle references if the value matches a variable pattern
-        if (validVariablePattern.matcher(variableValue).matches()) {
+        if (variablesTable.isVariableDeclared(variableValue) != 0) {
             variableValue = resolveVariableReference(variableValue);
         }
 
         // Validate the value
+        if (type.equals(CHAR)) {
+            variableValue = "'" + variableValue + "'";
+        }
+        if (type.equals(STRING)) {
+            variableValue = "\"" + variableValue + "\"";
+        }
         validateVariableValue(variableName, type, valuePattern, variableValue);
 
         // Add the variable to the symbol table
@@ -458,14 +463,13 @@ public class CompilationEngine {
         else {
             variablesTable.declareVariable(variableName, type, variableValue, isConstant);
         }
-
         tokenizer.advance(); // Move past the value
         // Verify if there are more declarations or end of line
         return verifyManyVariableDeclarations(variableName, tokenizer.getCurrentToken());
     }
 
     private String resolveVariableReference(String variableValue) {
-        variablesTable.findVariableScope(variableValue); // Throws if the variable doesn't exist
+//        variablesTable.findVariableScope(variableValue); // Throws if the variable doesn't exist
         return variablesTable.getValue(variableValue);
     }
 
@@ -490,11 +494,13 @@ public class CompilationEngine {
     }
 
     private int verifyManyVariableDeclarations(String variableName, String currentToken) throws InvalidVariableDeclarationException {
+
         switch (currentToken) {
             case EOL_COMMA:
                 return END_OF_LINE;
             case COMMA:
                 tokenizer.advance();
+                System.out.println(tokenizer.getCurrentToken());
                 return MORE_VARIABLES;
             default:
                 throw new InvalidVariableDeclarationException(variableName, currentToken);
@@ -529,8 +535,8 @@ public class CompilationEngine {
 
     private String verifyVariableName() throws InavlidVariableName {
         String currentToken = tokenizer.getCurrentToken();
-        Matcher variableMatcher = validVariablePattern.matcher(currentToken);
-        if (!variableMatcher.find()) {
+//        Matcher variableMatcher = validVariablePattern.matcher(currentToken);
+        if (VALID_VARIABLE_REGEX.matches(currentToken)) {
             throw new InavlidVariableName(currentToken);
         } else {
             return currentToken;
