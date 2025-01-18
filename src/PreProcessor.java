@@ -54,7 +54,6 @@ public class PreProcessor {
         try (BufferedReader reader = new BufferedReader(new FileReader(cleanedFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                //TODO: must end with one of the following suffixes
                 Matcher endOfLineMatcher = endOfLinePattern.matcher(line);
                 if (!endOfLineMatcher.find()) {
                     throw new EndOfLineException(line);

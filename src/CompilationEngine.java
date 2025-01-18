@@ -100,7 +100,7 @@ public class CompilationEngine {
             if (TYPES.contains(token)) {
                 verifyVariableDeclaration(token, false);
             } else if (token.equals(FINAL)) {
-                tokenizer.advance();
+//                tokenizer.advance();
                 verifyVariableDeclaration(token, true);
             } else if (token.equals(VOID)) {
                 verifyFunctionDeclaration();
@@ -310,7 +310,7 @@ public class CompilationEngine {
 
         // Check ')'
         tokenizer.advance();
-//        TODO: Check with nir - This case is handled in preProcessor?
+//        TODO: Check with nir - This case is handled in preProcessor? Nir - Yes, in processCleanedFile()
 //        if (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING)){
 //            // Raise ')' error -> missing symbol
 //        }
@@ -321,12 +321,14 @@ public class CompilationEngine {
         }
 
         // Check ;
-        // TODO: Did we check in preProcessor?
+        // TODO: Did we check in preProcessor? Nir - check what?
         tokenizer.advance();
 
     }
 
-    //TODO : maybe ask nir how to handle
+    //TODO : maybe ask nir how to handle.
+    // Nir - check if variablesMap.getType(funcName) == functionsTable.getParameterType(funcName, parameterIndex)
+    // Nir - for parameter assignment, check if variablesMap.getValue(variableName) != "null"
     private void verifyFunctionCallVariables(String funcName) throws MissingVariableTypeInFunctionDeclarationException {
 
         // Missing type case
@@ -334,7 +336,6 @@ public class CompilationEngine {
             // missing type error
             throw new MissingVariableTypeInFunctionDeclarationException(funcName);
         }
-
         // check type validity and that they are assigned
 
     }
@@ -414,6 +415,7 @@ public class CompilationEngine {
         tokenizer.advance(); // Move to the variable name
 
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
+
             // Validate and process the variable name
             String variableName = verifyVariableName();
 
@@ -453,10 +455,11 @@ public class CompilationEngine {
         if (isAssignment) {
             variablesTable.assignValue(variableName, variableValue);
         }
-        variablesTable.declareVariable(variableName, type, variableValue, isConstant);
+        else {
+            variablesTable.declareVariable(variableName, type, variableValue, isConstant);
+        }
 
         tokenizer.advance(); // Move past the value
-
         // Verify if there are more declarations or end of line
         return verifyManyVariableDeclarations(variableName, tokenizer.getCurrentToken());
     }
@@ -483,7 +486,7 @@ public class CompilationEngine {
             throw new InvalidValueException(variableName, variableValue);
         }
         // TODO : Dont we need to add here - !validIntPattern.matcher(variableValue).matches() - ?
-        // No, double also catches int
+        // Nir - No, double also catches int
     }
 
     private int verifyManyVariableDeclarations(String variableName, String currentToken) throws InvalidVariableDeclarationException {

@@ -4,3 +4,7 @@ int i1, i2 = 6;
 char c='Z', f;
 boolean a, b ,c , d = true, e, f = 5;
 String a = "hello" , b = "goodbye";
+int g = 5;
+int h = g;
+float fl = 000;
+boolean flag1, flag2 = 1, 0.1;
