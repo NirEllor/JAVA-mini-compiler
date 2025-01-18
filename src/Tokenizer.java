@@ -87,7 +87,7 @@ public class Tokenizer {
     }
 
     public String getCurrentToken() {
-//        System.out.println(currentToken);
+        System.out.println(currentToken);
         return currentToken;
     }
 

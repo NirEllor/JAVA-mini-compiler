@@ -45,7 +45,6 @@ public class CompilationEngine {
     public static final String VALID_DOUBLE_REGEX = "^[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?$";
     public static final String VALID_STRING_REGEX = "^\".*\"$";
 
-    public Pattern validVariablePattern = Pattern.compile(VALID_VARIABLE_REGEX);
 
     public Pattern validIntPattern = Pattern.compile(VALID_INT_REGEX);
     public Pattern validCharPattern = Pattern.compile(VALID_CHAR_REGEX);
@@ -95,7 +94,7 @@ public class CompilationEngine {
         while (token != null) {
 
             currentScope = variablesTable.getCurrentScope();
-
+            System.out.println(variablesTable.isVariableDeclared(token));
             if (TYPES.contains(token)) {
                 verifyVariableDeclaration(token, false);
             } else if (token.equals(FINAL)) {
@@ -121,6 +120,7 @@ public class CompilationEngine {
 
             token = tokenizer.getCurrentToken();
         }
+        variablesTable.printSymbolTable();
     }
 
 
@@ -180,7 +180,7 @@ public class CompilationEngine {
 
     private boolean varOrFunctionCallCase(String currToken) throws InavlidVariableName, NonExistingFunctionException, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, InvalidVariableDeclarationException, InvalidVariableAssignmentEception, InvalidValueException, ConstantAssignmentException {
         String nextToken;
-        if (verifyVariableName().equals(currToken)) {
+        if (verifyVariableName(tokenizer.getCurrentToken()).equals(currToken)) {
             tokenizer.lookAhead();
             nextToken = tokenizer.getCurrentToken();
             // Function call case
@@ -343,7 +343,7 @@ public class CompilationEngine {
     private void verifyVariableDeclaration(String token, boolean isConstant) throws InavlidVariableName,
             InvalidVariableDeclarationException, InvalidValueException, ConstantAssignmentException {
         // Whether final or not, now the token is on the type
-        
+
         switch (token) {
             case INT:
                 verifyVariable(INT, validIntPattern, isConstant);
@@ -372,7 +372,7 @@ public class CompilationEngine {
             variablesTable.findVariableScope(variableName); // throws if variable not declared
             String type = variablesTable.getType(variableName);
             boolean isConstant = variablesTable.isConstant(variableName);
-            variableName = verifyVariableName();
+            variableName = verifyVariableName(tokenizer.getCurrentToken());
             tokenizer.advance(); // Move to "="
 
             // check if variables were not assigned (e.g: a = ;, a = ,)
@@ -386,10 +386,9 @@ public class CompilationEngine {
             if (postAssignmentStatus == END_OF_LINE) {
                 break;
             } else if (postAssignmentStatus == MORE_VARIABLES) {
+                System.out.println("more variables");
                 tokenizer.advance();
             }
-
-
         }
     }
 
@@ -415,7 +414,7 @@ public class CompilationEngine {
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
 
             // Validate and process the variable name
-            String variableName = verifyVariableName();
+            String variableName = verifyVariableName(tokenizer.getCurrentToken());
             tokenizer.advance(); // Move to "="
             int valueStatus = verifyEqualSign(variableName, type, isConstant);
 
@@ -424,8 +423,6 @@ public class CompilationEngine {
                 int postAssignmentStatus = processVariableWithValue(variableName, type, valuePattern, isConstant, isAssignment);
                 if (postAssignmentStatus == END_OF_LINE) {
                     break;
-                } else if (postAssignmentStatus == MORE_VARIABLES) {
-                    tokenizer.advance();
                 }
             } else if (valueStatus == END_OF_LINE) {
                 break;
@@ -531,8 +528,8 @@ public class CompilationEngine {
 
 
 
-    private String verifyVariableName() throws InavlidVariableName {
-        String currentToken = tokenizer.getCurrentToken();
+    private String verifyVariableName(String currentToken) throws InavlidVariableName {
+        System.out.println("above is the name");
 //        Matcher variableMatcher = validVariablePattern.matcher(currentToken);
         if (VALID_VARIABLE_REGEX.matches(currentToken)) {
             throw new InavlidVariableName(currentToken);

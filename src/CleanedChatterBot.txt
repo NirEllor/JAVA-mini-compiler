@@ -1,10 +1,2 @@
-final double PI = 3;
-double a, b;
-int i1, i2 = 6;
-char c='Z', f;
-boolean d = true, e, f = 5;
-String i = "hello" , jk = "goodbye";
-int g = 5;
-int h = g;
-float fl = 000;
-boolean flag1, flag2 = 1, 0.1;
+int a = 3;
+a = 2;

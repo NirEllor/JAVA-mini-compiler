@@ -74,7 +74,6 @@ public class SymbolTable {
 
     public int isVariableDeclared(String name) {
         for (int scope = currentScope; scope >= 1; scope--) {
-            System.out.println(scope);
             if (variablesMap.containsKey(scope) && variablesMap.get(scope).containsKey(name)) {
                 return scope;
             }
@@ -90,12 +89,18 @@ public class SymbolTable {
     // Helper function to find the scope where a variable is declared
     public int findVariableScope(String name) {
         for (int scope = currentScope; scope >= 1; scope--) {
-            System.out.println(scope);
             if (variablesMap.containsKey(scope) && variablesMap.get(scope).containsKey(name)) {
                 return scope;
             }
         }
         throw new IllegalArgumentException("Variable '" + name + "' not declared in any accessible scope");
+    }
+    public void printSymbolTable() {
+        System.out.println("Symbol Table:");
+        for (int scope : variablesMap.keySet()) {
+            System.out.println("Scope " + scope + ": " + variablesMap.get(scope));
+        }
+
     }
 
 
