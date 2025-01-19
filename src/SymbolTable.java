@@ -7,6 +7,7 @@ public class SymbolTable {
 
     static class Triple {
         private final Stack<Object> globalVariableValuesStack;
+        private int lastUpdatedScope;
         String type;
         Object value;
         boolean isConstant;
@@ -16,6 +17,7 @@ public class SymbolTable {
             this.value = value;
             this.isConstant = isConstant;
             this.globalVariableValuesStack = new Stack<Object>();
+            this.lastUpdatedScope = 0;
         }
 
         @Override
@@ -37,6 +39,11 @@ public class SymbolTable {
         variablesMap.remove(currentScope);
         currentScope--;
         HashMap<String, Triple> globalVariables = variablesMap.get(0);
+        for (Map.Entry<String, Triple> entry : globalVariables.entrySet()) {
+            if (entry.getValue().lastUpdatedScope == currentScope) {
+
+            }
+        }
 
     }
 
@@ -53,6 +60,7 @@ public class SymbolTable {
         currentScopeMap.put(name, new Triple(type, value, isConstant));
         if (currentScope == 1) {
             variablesMap.get(1).get(name).globalVariableValuesStack.push(value);
+            variablesMap.get(1).get(name).lastUpdatedScope++;
         }
     }
 
@@ -66,6 +74,8 @@ public class SymbolTable {
         if (currentScope == 1) {
 
             variablesMap.get(1).get(name).globalVariableValuesStack.push(value);
+            variablesMap.get(1).get(name).lastUpdatedScope++;
+
         }
     }
 
