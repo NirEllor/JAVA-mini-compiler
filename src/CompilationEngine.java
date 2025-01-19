@@ -479,6 +479,7 @@ public class CompilationEngine {
     }
 
 
+
     private void handleBooleanValues(String variableName, String variableValue) throws InvalidValueException {
         // Booleans are either TRUE, FALSE, or valid numeric values (int or double)
         if (!variableValue.equals(TRUE) && !variableValue.equals(FALSE)

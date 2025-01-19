@@ -35,16 +35,19 @@ public class SymbolTable {
         return currentScope;
     }
 
+
+
     public void exitScope() {
         variablesMap.remove(currentScope);
         currentScope--;
         HashMap<String, Triple> globalVariables = variablesMap.get(0);
         for (Map.Entry<String, Triple> entry : globalVariables.entrySet()) {
-            if (entry.getValue().lastUpdatedScope == currentScope) {
-
+            if (entry.getValue().lastUpdatedScope == getCurrentScope()) {
+                entry.getValue().globalVariableValuesStack.pop();
+                entry.getValue().lastUpdatedScope--;
+                entry.getValue().value = entry.getValue().globalVariableValuesStack.peek();
             }
         }
-
     }
 
     public void declareVariable(String name, String type, Object value, boolean isConstant) {
@@ -58,7 +61,7 @@ public class SymbolTable {
         }
 
         currentScopeMap.put(name, new Triple(type, value, isConstant));
-        if (currentScope == 1) {
+        if (getCurrentScope() == 1) {
             variablesMap.get(1).get(name).globalVariableValuesStack.push(value);
             variablesMap.get(1).get(name).lastUpdatedScope++;
         }
@@ -71,7 +74,7 @@ public class SymbolTable {
         }
         Triple Triple = variablesMap.get(scope).get(name);
         Triple.value = value;
-        if (currentScope == 1) {
+        if (getCurrentScope() == 1) {
 
             variablesMap.get(1).get(name).globalVariableValuesStack.push(value);
             variablesMap.get(1).get(name).lastUpdatedScope++;
