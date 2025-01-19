@@ -41,9 +41,9 @@ public class CompilationEngine {
 
     private static final String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
     public static final String VALID_INT_REGEX = "^[+-]?\\d+$";
-    public static final String VALID_CHAR_REGEX = "^'[^']'$";
+    public static final String VALID_CHAR_REGEX = "^[^']$";
     public static final String VALID_DOUBLE_REGEX = "^[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?$";
-    public static final String VALID_STRING_REGEX = "^\".*\"$";
+    public static final String VALID_STRING_REGEX = "^.*$";
 
 
     public Pattern validIntPattern = Pattern.compile(VALID_INT_REGEX);
@@ -92,13 +92,13 @@ public class CompilationEngine {
         int currentScope;
 
         while (token != null) {
-            System.out.println("current token: " + token);
             currentScope = variablesTable.getCurrentScope();
-            if (TYPES.contains(token)) {
-                verifyVariableDeclaration(token, false);
-            } else if (token.equals(FINAL)) {
+            if (token.equals(FINAL)) {
                 tokenizer.advance();
-                verifyVariableDeclaration(token, true);
+                verifyVariableDeclaration(tokenizer.getCurrentToken(), true);
+            } else if (TYPES.contains(token)) {
+                tokenizer.advance();
+                verifyVariableDeclaration(token, false);
             } else if (token.equals(VOID)) {
                 verifyFunctionDeclaration();
             } else if ( currentScope == GLOBAL_SCOPE &&
@@ -359,6 +359,7 @@ public class CompilationEngine {
                 verifyVariable(STRING, validStringPattern, isConstant);
                 break;
         }
+//        System.out.println(tokenizer.getCurrentToken());
 //        tokenizer.advance();
 
 
@@ -405,7 +406,9 @@ public class CompilationEngine {
 
     private void verifyVariable(String type, Pattern valuePattern, boolean isConstant)
             throws InvalidVariableDeclarationException, InvalidValueException, InavlidVariableName, ConstantAssignmentException {
-        tokenizer.advance(); // Move to the variable name
+        if (isConstant) {
+            tokenizer.advance(); // Move to the variable name
+        }
 
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
 
@@ -442,12 +445,12 @@ public class CompilationEngine {
         }
 
         // Validate the value
-        if (type.equals(CHAR)) {
-            variableValue = "'" + variableValue + "'";
-        }
-        if (type.equals(STRING)) {
-            variableValue = "\"" + variableValue + "\"";
-        }
+//        if (type.equals(CHAR)) {
+//            variableValue = "'" + variableValue + "'";
+//        }
+//        if (type.equals(STRING)) {
+//            variableValue = "\"" + variableValue + "\"";
+//        }
         validateVariableValue(variableName, type, valuePattern, variableValue);
 
         // Add the variable to the symbol table
@@ -472,6 +475,8 @@ public class CompilationEngine {
         if (type.equals(BOOLEAN)) {
             handleBooleanValues(variableName, variableValue);
         } else if (!valuePattern.matcher(variableValue).matches()) {
+            System.out.println(valuePattern);
+            System.out.println(variableValue);
             throw new InvalidValueException(variableName, variableValue);
         }
     }

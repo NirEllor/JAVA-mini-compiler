@@ -1,2 +1,1 @@
-final int i;
-final int were = 3;
+int a = 5

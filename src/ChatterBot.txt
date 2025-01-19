@@ -29,5 +29,23 @@
 //a = 1, b = 2, c= 4, d = 3;
 
 
-final int i;
-final int were = 3;
+//final int mi;
+//final int were = 3;
+//were = 5;
+
+
+//a = 3;
+
+//String s = "s";
+//s = "ab";
+
+//int a
+//int a =
+//int a = 5
+// Problematic - return a nullPointerException instead of Compilation
+
+//String a = "45";
+
+
+//char c = '4';
+//c = 'd';
