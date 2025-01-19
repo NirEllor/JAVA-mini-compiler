@@ -90,7 +90,8 @@ public class PreProcessor {
                 System.out.println("All parentheses are balanced.");
             }
         } catch (FunctionException | EndOfLineException | UnbalancedParenthesesException e) {
-            System.out.println(e.getMessage());
+            System.out.println("1");
+            System.err.println(e.getMessage());
             cleanedFilePath = "";
         }
     }
@@ -129,6 +130,7 @@ public class PreProcessor {
             cleanFile();
             processCleanedFile();
         } catch (IOException e) {
+            System.err.println("Couldn't open file" + " " + filePath + " ");
             cleanedFilePath = "";
         }
         return cleanedFilePath;
@@ -140,7 +142,7 @@ public class PreProcessor {
         PreProcessor preProcessor = new PreProcessor(inputFile, functionsTable);
 
         String output = preProcessor.run();
-        System.out.println(output);
+//        System.out.println(output);
 
         // Print functions table content
         functionsTable.printFunctionsTable();

@@ -68,10 +68,9 @@ public class CompilationEngine {
             this.functionTable = functionTable;
             tokenizer.advance();
             verifyFile();
-            System.out.println("0");
+            System.out.print("0");
         } catch (IOException e){
-            System.out.println("2");
-            System.out.println(e.getMessage());
+            System.out.print("2");
         } catch (GlobalScopeException | InavlidVariableName | InvalidVariableDeclarationException |
                  InvalidValueException | FinalReturnException | InvalidTypeException |
                  InnerMethodDeclarationException | NonExistingFunctionException | IllegalReturnFormat |
@@ -80,7 +79,7 @@ public class CompilationEngine {
                  IllegalVarTypeInConditionException | UninitializedVariableInConditionException |
                  IllegalConditionException | InvalidVariableAssignmentEception | ConstantAssignmentException e) {
             System.out.println("1");
-            System.err.println(e.getMessage());
+            System.err.print(e.getMessage());
         }
 
     }
@@ -475,9 +474,7 @@ public class CompilationEngine {
         if (type.equals(BOOLEAN)) {
             handleBooleanValues(variableName, variableValue);
         } else if (!valuePattern.matcher(variableValue).matches()) {
-            System.out.println(valuePattern);
-            System.out.println(variableValue);
-            throw new InvalidValueException(variableName, variableValue);
+            throw new InvalidValueException(variableName, variableValue, type);
         }
     }
 
@@ -486,7 +483,7 @@ public class CompilationEngine {
         // Booleans are either TRUE, FALSE, or valid numeric values (int or double)
         if (!variableValue.equals(TRUE) && !variableValue.equals(FALSE)
                 && !validDoublePattern.matcher(variableValue).matches()) {
-            throw new InvalidValueException(variableName, variableValue);
+            throw new InvalidValueException(variableName, variableValue, BOOLEAN);
         }
         // TODO : Dont we need to add here - !validIntPattern.matcher(variableValue).matches() - ?
         // Nir - No, double also catches int

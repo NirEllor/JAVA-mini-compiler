@@ -24,9 +24,11 @@ public class JavaVerifier {
         PreProcessor preProcessor = new PreProcessor(filePath, functionsTable);
         String output = preProcessor.run();
         if (Objects.equals(output, "")){
-            System.out.println("preprocessor failed");
+            System.out.print("preprocessor failed");
         }
-        CompilationEngine engine = new CompilationEngine(output, functionsTable);
+        else {
+            CompilationEngine engine = new CompilationEngine(output, functionsTable);
+        }
 //        System.out.println(output);
 
     }
