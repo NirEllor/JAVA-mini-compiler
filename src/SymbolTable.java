@@ -15,7 +15,7 @@ public class SymbolTable {
             this.type = type;
             this.value = value;
             this.isConstant = isConstant;
-            this.globalVariableValuesStack = null;
+            this.globalVariableValuesStack = new Stack<Object>();
         }
 
         @Override
@@ -36,6 +36,10 @@ public class SymbolTable {
     public void exitScope() {
         variablesMap.remove(currentScope);
         currentScope--;
+        HashMap<String, Triple> globalVariables = variablesMap.get(0);
+        for (Map.Entry<String, Triple> entry : globalVariables.entrySet()) {
+            entry.getValue().globalVariableValuesStack.push(entry.getKey());
+        }
     }
 
     public void declareVariable(String name, String type, Object value, boolean isConstant) {
@@ -49,6 +53,9 @@ public class SymbolTable {
         }
 
         currentScopeMap.put(name, new Triple(type, value, isConstant));
+        if (currentScope == 1) {
+            variablesMap.get(1).get(name).globalVariableValuesStack.push(value);
+        }
     }
 
     public void assignValue(String name, Object value) throws ConstantAssignmentException {
@@ -58,6 +65,10 @@ public class SymbolTable {
         }
         Triple Triple = variablesMap.get(scope).get(name);
         Triple.value = value;
+        if (currentScope == 1) {
+
+            variablesMap.get(1).get(name).globalVariableValuesStack.push(value);
+        }
     }
 
     public String getValue(String name) {
