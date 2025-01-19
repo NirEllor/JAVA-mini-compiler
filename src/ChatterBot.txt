@@ -39,7 +39,8 @@
 //String s = "s";
 //s = "ab";
 
-int a = true;
+//final int a = 5;
+//final int b = a;
 //int a =
 //int a = 5
 // Problematic - return a nullPointerException instead of Compilation

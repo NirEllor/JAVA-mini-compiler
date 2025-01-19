@@ -6,6 +6,7 @@ public class SymbolTable {
     private int currentScope = 0;
 
     static class Triple {
+        private final Stack<Object> globalVariableValuesStack;
         String type;
         Object value;
         boolean isConstant;
@@ -14,6 +15,7 @@ public class SymbolTable {
             this.type = type;
             this.value = value;
             this.isConstant = isConstant;
+            this.globalVariableValuesStack = null;
         }
 
         @Override
