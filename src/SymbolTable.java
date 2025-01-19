@@ -37,9 +37,7 @@ public class SymbolTable {
         variablesMap.remove(currentScope);
         currentScope--;
         HashMap<String, Triple> globalVariables = variablesMap.get(0);
-        for (Map.Entry<String, Triple> entry : globalVariables.entrySet()) {
-            entry.getValue().globalVariableValuesStack.push(entry.getKey());
-        }
+
     }
 
     public void declareVariable(String name, String type, Object value, boolean isConstant) {
