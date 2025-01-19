@@ -48,7 +48,7 @@ public class PreProcessor {
     }
 
     // Processes the cleaned file to collect function names and validate parentheses
-    public void processCleanedFile() throws IOException, EndOfLineException, UnbalancedParenthesesException {
+    public void processCleanedFile() throws IOException {
         Stack<Character> stack = new Stack<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(cleanedFilePath))) {
@@ -91,12 +91,14 @@ public class PreProcessor {
             }
         } catch (FunctionException e) {
             System.out.println(e.getMessage());
+            cleanedFilePath = "";
         } catch (EndOfLineException e) {
             System.out.println(e.getMessage());
+            cleanedFilePath = "";
         } catch (UnbalancedParenthesesException e) {
             System.out.println(e.getMessage());
+            cleanedFilePath = "";
         }
-
     }
 
     private boolean isReservedKeyword(String functionName) {
@@ -132,7 +134,7 @@ public class PreProcessor {
         try {
             cleanFile();
             processCleanedFile();
-        } catch (IOException | UnbalancedParenthesesException | EndOfLineException e) {
+        } catch (IOException e) {
             cleanedFilePath = "";
         }
         return cleanedFilePath;
