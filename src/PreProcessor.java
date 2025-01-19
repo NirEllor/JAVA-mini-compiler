@@ -48,7 +48,7 @@ public class PreProcessor {
     }
 
     // Processes the cleaned file to collect function names and validate parentheses
-    public void processCleanedFile() throws IOException {
+    public void processCleanedFile() throws IOException, EndOfLineException, UnbalancedParenthesesException {
         Stack<Character> stack = new Stack<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(cleanedFilePath))) {
@@ -132,7 +132,7 @@ public class PreProcessor {
         try {
             cleanFile();
             processCleanedFile();
-        } catch (IOException e) {
+        } catch (IOException | UnbalancedParenthesesException | EndOfLineException e) {
             cleanedFilePath = "";
         }
         return cleanedFilePath;
