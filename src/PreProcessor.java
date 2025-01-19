@@ -89,13 +89,7 @@ public class PreProcessor {
             } else {
                 System.out.println("All parentheses are balanced.");
             }
-        } catch (FunctionException e) {
-            System.out.println(e.getMessage());
-            cleanedFilePath = "";
-        } catch (EndOfLineException e) {
-            System.out.println(e.getMessage());
-            cleanedFilePath = "";
-        } catch (UnbalancedParenthesesException e) {
+        } catch (FunctionException | EndOfLineException | UnbalancedParenthesesException e) {
             System.out.println(e.getMessage());
             cleanedFilePath = "";
         }
