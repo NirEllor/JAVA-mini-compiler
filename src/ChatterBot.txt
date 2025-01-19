@@ -1,2 +1,33 @@
-int a = 3;
-a = 2;
+//int a = 1;
+//a = 2;
+
+//int a = 1, b = 2;
+//a = 2;
+
+//int a = 1, b = 2;
+//b = 1;
+
+//int a = 1, b = 2;
+//a = 2, b = 1;
+
+//int a = 1, b;
+
+//int a = 1, b;
+//b = 1;
+
+//int a, b = 1;
+//a = 1;
+
+//int a = 1, b= 2, c = 3, d;
+//a = 2;
+
+//int a, b;
+//a = 1, b= 300;
+
+
+//int a, b, c, d, e = 10, f=11, g=0;
+//a = 1, b = 2, c= 4, d = 3;
+
+
+final int i;
+final int were = 3;

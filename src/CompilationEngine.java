@@ -92,13 +92,12 @@ public class CompilationEngine {
         int currentScope;
 
         while (token != null) {
-
+            System.out.println("current token: " + token);
             currentScope = variablesTable.getCurrentScope();
-            System.out.println(variablesTable.isVariableDeclared(token));
             if (TYPES.contains(token)) {
                 verifyVariableDeclaration(token, false);
             } else if (token.equals(FINAL)) {
-//                tokenizer.advance();
+                tokenizer.advance();
                 verifyVariableDeclaration(token, true);
             } else if (token.equals(VOID)) {
                 verifyFunctionDeclaration();
@@ -119,8 +118,8 @@ public class CompilationEngine {
             }
 
             token = tokenizer.getCurrentToken();
+            variablesTable.printSymbolTable();
         }
-        variablesTable.printSymbolTable();
     }
 
 
@@ -343,7 +342,6 @@ public class CompilationEngine {
     private void verifyVariableDeclaration(String token, boolean isConstant) throws InavlidVariableName,
             InvalidVariableDeclarationException, InvalidValueException, ConstantAssignmentException {
         // Whether final or not, now the token is on the type
-
         switch (token) {
             case INT:
                 verifyVariable(INT, validIntPattern, isConstant);
@@ -361,14 +359,14 @@ public class CompilationEngine {
                 verifyVariable(STRING, validStringPattern, isConstant);
                 break;
         }
-        tokenizer.advance();
+//        tokenizer.advance();
+
+
     }
 
     private void verifyVariableAssignment() throws InavlidVariableName, InvalidVariableDeclarationException, InvalidVariableAssignmentEception, InvalidValueException, ConstantAssignmentException {
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
-
             String variableName = tokenizer.getCurrentToken();
-
             variablesTable.findVariableScope(variableName); // throws if variable not declared
             String type = variablesTable.getType(variableName);
             boolean isConstant = variablesTable.isConstant(variableName);
@@ -384,10 +382,8 @@ public class CompilationEngine {
             int postAssignmentStatus = processVariableWithValue(variableName, type, valuePattern, isConstant,
                     isAssignment);
             if (postAssignmentStatus == END_OF_LINE) {
-                break;
-            } else if (postAssignmentStatus == MORE_VARIABLES) {
-                System.out.println("more variables");
                 tokenizer.advance();
+                break;
             }
         }
     }
@@ -422,9 +418,11 @@ public class CompilationEngine {
                 boolean isAssignment = false;
                 int postAssignmentStatus = processVariableWithValue(variableName, type, valuePattern, isConstant, isAssignment);
                 if (postAssignmentStatus == END_OF_LINE) {
+                    tokenizer.advance();
                     break;
                 }
             } else if (valueStatus == END_OF_LINE) {
+                tokenizer.advance();
                 break;
             } else if (valueStatus == MORE_VARIABLES) {
                 tokenizer.advance(); // Move to the next variable name
@@ -529,7 +527,6 @@ public class CompilationEngine {
 
 
     private String verifyVariableName(String currentToken) throws InavlidVariableName {
-        System.out.println("above is the name");
 //        Matcher variableMatcher = validVariablePattern.matcher(currentToken);
         if (VALID_VARIABLE_REGEX.matches(currentToken)) {
             throw new InavlidVariableName(currentToken);
