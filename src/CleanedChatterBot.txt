@@ -1,5 +1,1 @@
-void func(int a){
-    if(){
-    }
-    return;
-}
+double f = .;

@@ -476,7 +476,7 @@ public class CompilationEngine {
 
         }
 
-        validateVariableValue(variableName, type, valuePattern, variableValue);
+        variableValue = validateVariableValue(variableName, type, valuePattern, variableValue);
 
         // Add the variable to the symbol table
         if (isAssignment) {
@@ -502,7 +502,7 @@ public class CompilationEngine {
         return variablesTable.getValue(variableValue);
     }
 
-    private void validateVariableValue(String variableName, String type, Pattern valuePattern, String variableValue)
+    private String  validateVariableValue(String variableName, String type, Pattern valuePattern, String variableValue)
             throws InvalidValueException {
         switch (type) {
             case DOUBLE:
@@ -521,6 +521,7 @@ public class CompilationEngine {
                     throw new InvalidValueException(variableName, variableValue, type);
                 }
         }
+        return variableValue;
     }
 
     private void handleStringValues() {

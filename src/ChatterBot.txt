@@ -58,8 +58,10 @@
 
 //String s = "";
 
-void func(int a){
-    if(){
-    }
-    return;
-}
+//double a = 0; good
+//double b = 0.1; good
+//double c = 0.; bad
+//double d = 0.; bad
+//double e = .5; bad
+// double f = .; bad - matter of exception
+
