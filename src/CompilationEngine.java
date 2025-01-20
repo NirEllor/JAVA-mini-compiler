@@ -512,26 +512,25 @@ public class CompilationEngine {
             case DOUBLE:
                 return handleDoubleValues(variableName, variableValue, type);
             case CHAR:
-                handleCharValues();
-                break;
+                return handleCharValues();
             case STRING:
-                handleStringValues();
-                break;
+                return handleStringValues();
             case BOOLEAN:
-                handleBooleanValues(variableName, variableValue);
-                break;
+                return handleBooleanValues(variableName, variableValue);
             default:
                 if (!valuePattern.matcher(variableValue).matches()) {
                     throw new InvalidValueException(variableName, variableValue, type);
                 }
+                return variableValue;
         }
-        return variableValue;
     }
 
-    private void handleStringValues() {
+    private String handleStringValues() {
+        return null;
     }
 
-    private void handleCharValues() {
+    private String handleCharValues() {
+        return null;
     }
 
     private String handleDoubleValues(String variableName, String variableValue, String type) throws InvalidValueException {
@@ -575,12 +574,13 @@ public class CompilationEngine {
     }
 
 
-    private void handleBooleanValues(String variableName, String variableValue) throws InvalidValueException {
+    private String handleBooleanValues(String variableName, String variableValue) throws InvalidValueException {
         // Booleans are either TRUE, FALSE, or valid numeric values (int or double)
-        if (!variableValue.equals(TRUE) && !variableValue.equals(FALSE)
-                && !validDoublePattern.matcher(variableValue).matches()) {
-            throw new InvalidValueException(variableName, variableValue, BOOLEAN);
+        if (!variableValue.equals(TRUE) && !variableValue.equals(FALSE)) {
+            variableValue = handleDoubleValues(variableName, variableValue, BOOLEAN);
         }
+        return variableValue;
+
     }
 
     private int verifyManyVariableDeclarations(String variableName, String currentToken) throws InvalidVariableDeclarationException {
