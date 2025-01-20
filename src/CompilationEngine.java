@@ -434,25 +434,6 @@ public class CompilationEngine {
             variableValue = resolveVariableReference(variableValue);
         }
 
-        // Validate the value
-        if (type.equals(CHAR)) {
-            if (!tokenizer.getCurrentToken().equals("'"))
-            {
-                //raise error
-                throw new Exception("char start");
-            }
-            tokenizer.advance();
-            variableValue = tokenizer.getCurrentToken();
-            if (variableValue.length() != 1){
-                throw new Exception("char length");
-            }
-            tokenizer.advance();
-            if (!tokenizer.getCurrentToken().equals("'"))
-            {
-                //raise error
-                throw new Exception("char end");
-            }
-        }
 
         if (type.equals(STRING)) {
             if (!tokenizer.getCurrentToken().equals("\""))
@@ -507,12 +488,12 @@ public class CompilationEngine {
     }
 
     private String  validateVariableValue(String variableName, String type, Pattern valuePattern, String variableValue)
-            throws InvalidValueException {
+            throws Exception {
         switch (type) {
             case DOUBLE:
                 return handleDoubleValues(variableName, variableValue, type);
             case CHAR:
-                return handleCharValues();
+                return handleCharValues(variableValue);
             case STRING:
                 return handleStringValues();
             case BOOLEAN:
@@ -529,8 +510,25 @@ public class CompilationEngine {
         return null;
     }
 
-    private String handleCharValues() {
-        return null;
+    private String handleCharValues(String variableValue) throws Exception {
+        if (!tokenizer.getCurrentToken().equals("'"))
+        {
+            //raise error
+            throw new Exception("char start");
+        }
+        tokenizer.advance();
+        variableValue = tokenizer.getCurrentToken();
+        String result = variableValue;
+        if (variableValue.length() != 1){
+            throw new Exception("char length");
+        }
+        tokenizer.advance();
+        if (!tokenizer.getCurrentToken().equals("'"))
+        {
+            //raise error
+            throw new Exception("char end");
+        }
+        return result;
     }
 
     private String handleDoubleValues(String variableName, String variableValue, String type) throws InvalidValueException {
