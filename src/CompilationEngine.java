@@ -21,6 +21,7 @@ public class CompilationEngine {
     public static final int MORE_VARIABLES = 2;
     public static final int GLOBAL_SCOPE = 1;
     public static final int VARIABLE_NOT_DECLARED = 0;
+    public static final String DOT = ".";
 
     private FunctionsTable functionTable;
     private SymbolTable variablesTable;
@@ -55,6 +56,8 @@ public class CompilationEngine {
 
     private static final Set<String> TYPES = new HashSet<>(Arrays.asList(
             INT, CHAR, BOOLEAN, DOUBLE, STRING));
+    private static final Set<String> AFTER_VARIABLE_VALUE_SYMBOLS  = new HashSet<>(Arrays.asList(
+            ";", ")", ",", "|", "&"));
 
 
     public CompilationEngine(String path, FunctionsTable functionTable) {
@@ -503,8 +506,7 @@ public class CompilationEngine {
             throws InvalidValueException {
         switch (type) {
             case DOUBLE:
-                handleDoubleValues();
-                break;
+                return handleDoubleValues(variableName, variableValue, type);
             case CHAR:
                 handleCharValues();
                 break;
@@ -527,7 +529,41 @@ public class CompilationEngine {
     private void handleCharValues() {
     }
 
-    private void handleDoubleValues() {
+    private String handleDoubleValues(String variableName, String variableValue, String type) throws InvalidValueException {
+        String tmp = variableValue;
+        String result = tmp;
+        if (validIntPattern.matcher(tmp).matches()) {
+            tokenizer.lookAhead();
+            tmp = tokenizer.getCurrentToken();
+            if (tmp.equals(DOT)) {
+                result += tmp;
+                tokenizer.lookAhead();
+                tmp = tokenizer.getCurrentToken();
+                if (validIntPattern.matcher(tmp).matches()) {
+                    result += tmp;
+                } else if (!AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
+                    throw new InvalidValueException(variableName,tmp, type);
+                } else {
+                    tokenizer.retreat();
+                }
+            } else if (!AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
+                throw new InvalidValueException(variableName,tmp, type);
+            } else {
+                tokenizer.retreat();
+            }
+        } else if (tmp.equals(DOT)) {
+            result += tmp;
+            tokenizer.lookAhead();
+            tmp = tokenizer.getCurrentToken();
+            if (validIntPattern.matcher(tmp).matches()) {
+                result += tmp;
+            } else {
+                throw new InvalidValueException(variableName,tmp, type);
+            }
+        } else {
+            throw new InvalidValueException(variableName, variableValue, type);
+        }
+        return result;
     }
 
 
