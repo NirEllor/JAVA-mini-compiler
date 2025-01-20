@@ -1,2 +1,2 @@
-double d = 0.;
-double d = 0.5;
+void foo(a) {
+}
