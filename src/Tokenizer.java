@@ -5,13 +5,13 @@ import java.util.regex.Pattern;
 
 public class Tokenizer {
 
-    private static final String SYMBOLS_REGEX = "[{}()\\[\\].,;&|<>=]";
+    private static final String SYMBOLS_REGEX = "[{}()\\[\\],;~%^+/$.\\-#@*~&|<>=\"']";
     private static final Pattern SYMBOLS_PATTERN = Pattern.compile(SYMBOLS_REGEX);
     private static final String INT_REGEX = "^(?:[1-9][0-9]{0,4}|0|32767)$";
     private static final Pattern INT_PATTERN = Pattern.compile(INT_REGEX);
 
     // Define the regex pattern for splitting tokens
-    private static final String TOKEN_SPLIT = "(" + SYMBOLS_REGEX + "|\\w+)";
+    private static final String TOKEN_SPLIT = "(" + SYMBOLS_REGEX + "|\\w+|(-)?\\d+)";
     private static final String IDENTIFIER_PATTERN = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
 
 
@@ -63,10 +63,12 @@ public class Tokenizer {
         while (true) {
             if (!tokensList.isEmpty()) {
                 currentToken = tokensList.remove(0);
+                System.out.println("current token: " + currentToken);
             } else {
                 lineIndex++;
                 if (lineIndex < inputCleanedLines.length) {
                     tokensList = getTokensFromLine(inputCleanedLines[lineIndex]);
+                    System.out.println(tokensList.toString());
                     continue;
                 } else {
                     currentToken = null;
@@ -87,7 +89,6 @@ public class Tokenizer {
     }
 
     public String getCurrentToken() {
-        System.out.println(currentToken);
         return currentToken;
     }
 
@@ -136,12 +137,11 @@ public class Tokenizer {
     }
 
     public static void main(String[] args) {
-        String[] input = new String[]{"int _a1=1; [g]", "func(a,)"};
+        String[] input = new String[]{"int -_a1 = -1.;", "\'yuli\'"};
         Tokenizer tokenizer = new Tokenizer(input);
 
         tokenizer.advance();
         while (tokenizer.currentToken != null) {
-            //System.out.println(tokenizer.currentToken);
             System.out.println(tokenizer.currentToken + " " + tokenizer.tokenType());
             tokenizer.advance();
         }

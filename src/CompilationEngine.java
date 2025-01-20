@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CompilationEngine {
@@ -77,14 +76,15 @@ public class CompilationEngine {
                  NumberOfVarsInFuncCallException | MissingVariableTypeInFunctionDeclarationException |
                  CallFunctionFromGlobalException | NonExistingVariableException | IllegalBlockInGlobalScope |
                  IllegalVarTypeInConditionException | UninitializedVariableInConditionException |
-                 IllegalConditionException | InvalidVariableAssignmentEception | ConstantAssignmentException e) {
+                 IllegalConditionException | InvalidVariableAssignmentEception | ConstantAssignmentException |
+                EmptyConditionException e) {
             System.out.println("1");
             System.err.print(e.getMessage());
         }
 
     }
 
-    private void verifyFile() throws GlobalScopeException, InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException, FinalReturnException, InnerMethodDeclarationException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, CallFunctionFromGlobalException, IllegalBlockInGlobalScope, NonExistingVariableException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException {
+    private void verifyFile() throws GlobalScopeException, InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException, FinalReturnException, InnerMethodDeclarationException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, CallFunctionFromGlobalException, IllegalBlockInGlobalScope, NonExistingVariableException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException, EmptyConditionException {
 
         String token = tokenizer.getCurrentToken();
         variablesTable.enterScope();
@@ -112,6 +112,8 @@ public class CompilationEngine {
                 throw new IllegalBlockInGlobalScope(token);
             } else if (tokenizer.tokenType().equals(IDENTIFIER)) {
                 throw new NonExistingVariableException(token);
+            } else if (token.equals(BRACE_CLOSING)) {
+                tokenizer.advance();
             } else {
                     throw new GlobalScopeException();
             }
@@ -124,7 +126,7 @@ public class CompilationEngine {
 
 
     private void verifyFunctionDeclaration() throws InavlidVariableName, InvalidValueException,
-            InvalidVariableDeclarationException, InnerMethodDeclarationException, FinalReturnException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException {
+            InvalidVariableDeclarationException, InnerMethodDeclarationException, FinalReturnException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException, EmptyConditionException {
         boolean returnFlag = false;
         //Now token is void so move to function name
         tokenizer.advance();
@@ -134,37 +136,38 @@ public class CompilationEngine {
         do {
             tokenizer.advance();
         } while (!this.tokenizer.getCurrentToken().equals(BRACKET_CLOSING));
+        // Advance to {
+        tokenizer.advance();
         //Now advance and handle what's in the method
         tokenizer.advance();
-
         String currToken = tokenizer.getCurrentToken();
 
         while (!currToken.equals(BRACE_CLOSING))
         {
-
-            if (!varOrFunctionCallCase(currToken)) {
-
-                if (TYPES.contains(currToken)) {
-                    // Local variable declaration case
-                    verifyVariableDeclaration(currToken, false);
-                } else if (currToken.equals(IF)) {
-                    // If block case
-                    verifyBlock(IF);
-                } else if (currToken.equals(WHILE)) {
-                    // While block case
-                    verifyBlock(WHILE);
-                } else if (currToken.equals(RETURN)) {
-                    // Return statement
-                    returnFlag = verifyReturnStatement();
-                } else if (currToken.equals(VOID)) {
-                    // Method declaration inside another method error
-                    // Raise inner method declaration error
-                    throw new InnerMethodDeclarationException();
-                }
+            //System.out.println(currToken);
+            if (TYPES.contains(currToken)) {
+                // Local variable declaration case
+                tokenizer.advance();
+                verifyVariableDeclaration(currToken, false);
+            } else if (currToken.equals(IF)) {
+                // If block case
+                verifyBlock(IF);
+            } else if (currToken.equals(WHILE)) {
+                // While block case
+                verifyBlock(WHILE);
+            } else if (currToken.equals(RETURN)) {
+                // Return statement
+                returnFlag = verifyReturnStatement();
+            } else if (currToken.equals(VOID)) {
+                // Method declaration inside another method error
+                // Raise inner method declaration error
+                throw new InnerMethodDeclarationException();
+            } else {
+                varOrFunctionCallCase(currToken);
             }
 
-            //TODO: How to check that the closing } is in separated row? maybe is preProcessor?
 
+            //TODO: How to check that the closing } is in separated row? maybe is preProcessor?
             currToken = tokenizer.getCurrentToken();
         }
 
@@ -176,13 +179,14 @@ public class CompilationEngine {
 
     }
 
-    private boolean varOrFunctionCallCase(String currToken) throws InavlidVariableName, NonExistingFunctionException, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, InvalidVariableDeclarationException, InvalidVariableAssignmentEception, InvalidValueException, ConstantAssignmentException {
+    private void varOrFunctionCallCase(String currToken) throws InavlidVariableName, NonExistingFunctionException, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, InvalidVariableDeclarationException, InvalidVariableAssignmentEception, InvalidValueException, ConstantAssignmentException {
         String nextToken;
+        //System.out.println("token : " + currToken);
         if (verifyVariableName(tokenizer.getCurrentToken()).equals(currToken)) {
             tokenizer.lookAhead();
             nextToken = tokenizer.getCurrentToken();
             // Function call case
-            if (nextToken.equals(BRACKET_OPENING)){
+            if (nextToken.equals(BRACKET_OPENING)) {
                 if (functionTable.hasFunction(currToken)) {
                     tokenizer.retreat();
                     verifyFunctionCall();
@@ -194,29 +198,40 @@ public class CompilationEngine {
                 // Local variable assignment
                 tokenizer.retreat();
                 verifyVariableAssignment();
+                //System.out.println("got back: " + tokenizer.getCurrentToken());
             }
-            return true;
         }
-
-        return false;
     }
 
-    private void verifyBlock(String blockType) throws InavlidVariableName, InvalidValueException, InnerMethodDeclarationException, InvalidVariableDeclarationException, NonExistingFunctionException, MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException {
+    private void verifyBlock(String blockType) throws InavlidVariableName, InvalidValueException, InnerMethodDeclarationException, InvalidVariableDeclarationException, NonExistingFunctionException, MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException, EmptyConditionException {
         // Advance to (
         tokenizer.advance();
+        // Advance to condition
+        tokenizer.advance();
         // Verify the condition + advance to )
-        verifyBlockCondition(blockType);
+        if (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING)){
+            verifyBlockCondition(blockType);
+        } else {
+            throw new EmptyConditionException(blockType);
+        }
         // Advance to {
         tokenizer.advance();
+        // Advance to after {
+        tokenizer.advance();
         // Advance to verify the inner part of the block
-        verifyInnerPartOfBlock();
+        if (!tokenizer.getCurrentToken().equals(BRACE_CLOSING)) {
+            verifyInnerPartOfBlock();
+        }
+        tokenizer.advance();
     }
 
-    private void verifyInnerPartOfBlock() throws InnerMethodDeclarationException, InavlidVariableName, InvalidValueException, InvalidVariableDeclarationException, NonExistingFunctionException, MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException {
+    private void verifyInnerPartOfBlock() throws InnerMethodDeclarationException, InavlidVariableName, InvalidValueException, InvalidVariableDeclarationException, NonExistingFunctionException, MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException, EmptyConditionException {
         String currToken = tokenizer.getCurrentToken();
-        if (!varOrFunctionCallCase(currToken)) {
+
+        while (!currToken.equals(BRACE_CLOSING)) {
             if (TYPES.contains(currToken)) {
                 // Local variable declaration case
+                tokenizer.advance();
                 verifyVariableDeclaration(currToken, false);
             } else if (currToken.equals(IF)) {
                 // If block case
@@ -228,7 +243,12 @@ public class CompilationEngine {
                 // Method declaration inside another method error
                 // Raise inner method declaration error
                 throw new InnerMethodDeclarationException();
+            } else {
+                varOrFunctionCallCase(currToken);
+                //System.out.println("now : " + currToken);
             }
+
+            currToken = tokenizer.getCurrentToken();
         }
     }
 
@@ -238,8 +258,10 @@ public class CompilationEngine {
         } while (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING));
     }
 
-    private void verifyBlockConditionCases(String blockType) throws IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
+    private void verifyBlockConditionCases(String blockType) throws IllegalVarTypeInConditionException,
+            UninitializedVariableInConditionException, IllegalConditionException {
         String token = tokenizer.getCurrentToken();
+        //System.out.println("token: " + token);
         if (token.equals("||") ||
                 token.equals("&&")) {
             tokenizer.advance();
@@ -256,10 +278,13 @@ public class CompilationEngine {
                 // Check with nir if a variable without assignment is initialized with null
                 throw new UninitializedVariableInConditionException(token, blockType);
             }
+            tokenizer.advance();
         } else if ((!validDoublePattern.matcher(token).matches()) &&
                 (!validIntPattern.matcher(token).matches())) {
             // Case 3 : A double or int constant/value (e.g. 5, -3, -21.5).
             throw new IllegalConditionException(blockType);
+        } else {
+            tokenizer.advance();
         }
     }
 
@@ -272,14 +297,8 @@ public class CompilationEngine {
         }
 
         // Check last return
-        tokenizer.lookAhead();
-        if (tokenizer.getCurrentToken().equals(BRACE_CLOSING)){
-            tokenizer.retreat();
-            return true;
-        }
-
-        return false;
-
+        tokenizer.advance();
+        return (tokenizer.getCurrentToken().equals(BRACE_CLOSING));
     }
 
     private void verifyFunctionCall() throws NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException {
@@ -328,11 +347,11 @@ public class CompilationEngine {
     // Nir - for parameter assignment, check if variablesMap.getValue(variableName) != "null"
     private void verifyFunctionCallVariables(String funcName) throws MissingVariableTypeInFunctionDeclarationException {
 
-        // Missing type case
-        if (!tokenizer.tokenType().equals(KEYWORD)){
-            // missing type error
-            throw new MissingVariableTypeInFunctionDeclarationException(funcName);
-        }
+//        // Wrong ype case
+//        if (!tokenizer.tokenType().equals(KEYWORD)){
+//            // missing type error
+//            throw new MissingVariableTypeInFunctionDeclarationException(funcName);
+//        }
         // check type validity and that they are assigned
 
     }
@@ -410,12 +429,10 @@ public class CompilationEngine {
         }
 
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
-
             // Validate and process the variable name
             String variableName = verifyVariableName(tokenizer.getCurrentToken());
             tokenizer.advance(); // Move to "="
             int valueStatus = verifyEqualSign(variableName, type, isConstant);
-
             if (valueStatus == HAS_VALUE) {
                 boolean isAssignment = false;
                 int postAssignmentStatus = processVariableWithValue(variableName, type, valuePattern, isConstant, isAssignment);
@@ -530,7 +547,6 @@ public class CompilationEngine {
 
 
     private String verifyVariableName(String currentToken) throws InavlidVariableName {
-//        Matcher variableMatcher = validVariablePattern.matcher(currentToken);
         if (VALID_VARIABLE_REGEX.matches(currentToken)) {
             throw new InavlidVariableName(currentToken);
         } else {

@@ -50,3 +50,13 @@
 
 //char c = '4';
 //c = 'd';
+
+void function(int a){
+    int i;
+    i=2;
+    if(true){
+        i=5;
+        function(5);
+    }
+    return;
+}
