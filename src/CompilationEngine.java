@@ -125,58 +125,8 @@ public class CompilationEngine {
     }
 
 
-
     private void verifyFunctionDeclaration() throws Exception,
             NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
-        boolean returnFlag = false;
-        //Now token is void so move to function name
-        tokenizer.advance();
-        //Now token is ( so move to function name
-        tokenizer.advance();
-        //Now we have var dec, so move past it (verification was handled is preProcessor)
-        do {
-            tokenizer.advance();
-        } while (!this.tokenizer.getCurrentToken().equals(BRACKET_CLOSING));
-        // Advance to {
-        tokenizer.advance();
-        //Now advance and handle what's in the method
-        tokenizer.advance();
-        String currToken = tokenizer.getCurrentToken();
-
-        while (!currToken.equals(BRACE_CLOSING))
-        {
-            //System.out.println(currToken);
-            if (TYPES.contains(currToken)) {
-                // Local variable declaration case
-                tokenizer.advance();
-                verifyVariableDeclaration(currToken, false);
-            } else if (currToken.equals(IF)) {
-                // If block case
-                verifyBlock(IF);
-            } else if (currToken.equals(WHILE)) {
-                // While block case
-                verifyBlock(WHILE);
-            } else if (currToken.equals(RETURN)) {
-                // Return statement
-                returnFlag = verifyReturnStatement();
-            } else if (currToken.equals(VOID)) {
-                // Method declaration inside another method error
-                // Raise inner method declaration error
-                throw new InnerMethodDeclarationException();
-            } else {
-                varOrFunctionCallCase(currToken);
-            }
-
-
-            //TODO: How to check that the closing } is in separated row? maybe is preProcessor?
-            currToken = tokenizer.getCurrentToken();
-        }
-
-        // Ensure we have last return;
-        if (!returnFlag) {
-            //raise missing last return error
-            throw new FinalReturnException();
-        }
 
     }
 

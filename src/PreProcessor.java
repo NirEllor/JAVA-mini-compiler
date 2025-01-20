@@ -59,6 +59,9 @@ public class PreProcessor {
                     throw new EndOfLineException(line);
                 }
                 line = line.trim();  // Trim leading and trailing whitespace
+                if (line.contains("}") && line.length() > 1) {
+                    throw new ClosingRightBraceException(line);
+                }
                 Matcher functionMatcher = validFunctionPattern.matcher(line);
                 while (functionMatcher.find()) {
                     String functionName = functionMatcher.group(1);
@@ -89,7 +92,8 @@ public class PreProcessor {
             } else {
                 System.out.println("All parentheses are balanced.");
             }
-        } catch (FunctionException | EndOfLineException | UnbalancedParenthesesException e) {
+        } catch (FunctionException | EndOfLineException | UnbalancedParenthesesException |
+                 ClosingRightBraceException e) {
             System.out.println("1");
             System.err.println(e.getMessage());
             cleanedFilePath = "";
