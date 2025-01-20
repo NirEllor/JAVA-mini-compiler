@@ -9,6 +9,6 @@ public class InvalidVariableDeclarationException extends Exception {
 
     @Override
     public String getMessage() {
-        return "Unexpected token '" + currentToken + "' after variable: " + variableName;
+        return "InvalidVariableDeclarationException: Unexpected token '" + currentToken + "' after variable: " + variableName;
     }
 }

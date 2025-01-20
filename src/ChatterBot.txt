@@ -45,18 +45,13 @@
 //int a = 5
 // Problematic - return a nullPointerException instead of Compilation
 
-String a = "yuli";
+// String a = "yuli";
 
 
 //char c = '4';
 //c = 'd';
 
-void function(int a){
-    int i;
-    i=2;
-    if(true){
-        i=5;
-        function(6);
-    }
-    return;
-}
+//int a = 5;
+//int b = a + 5;
+
+double Pi = 3.1;

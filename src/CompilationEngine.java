@@ -537,13 +537,34 @@ public class CompilationEngine {
 
     private void validateVariableValue(String variableName, String type, Pattern valuePattern, String variableValue)
             throws InvalidValueException {
-        if (type.equals(BOOLEAN)) {
-            handleBooleanValues(variableName, variableValue);
-        } else if (!valuePattern.matcher(variableValue).matches()) {
-            throw new InvalidValueException(variableName, variableValue, type);
+        switch (type) {
+            case DOUBLE:
+                handleDoubleValues();
+                break;
+            case CHAR:
+                handleCharValues();
+                break;
+            case STRING:
+                handleStringValues();
+                break;
+            case BOOLEAN:
+                handleBooleanValues(variableName, variableValue);
+                break;
+            default:
+                if (!valuePattern.matcher(variableValue).matches()) {
+                    throw new InvalidValueException(variableName, variableValue, type);
+                }
         }
     }
 
+    private void handleStringValues() {
+    }
+
+    private void handleCharValues() {
+    }
+
+    private void handleDoubleValues() {
+    }
 
 
     private void handleBooleanValues(String variableName, String variableValue) throws InvalidValueException {

@@ -1,10 +1,1 @@
-String a = "yuli";
-void function(int a){
-    int i;
-    i=2;
-    if(true){
-        i=5;
-        function(6);
-    }
-    return;
-}
+double Pi = 3.1;
