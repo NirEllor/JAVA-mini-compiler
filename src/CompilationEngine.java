@@ -206,6 +206,11 @@ public class CompilationEngine {
 
     private void verifyBlockCondition(String blockType) throws IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
         // TODO: How to check that we dont have illegal way of using && and ||?
+        String currentToken = tokenizer.getCurrentToken();
+        // TODO: change
+        if (currentToken.equals("||") || currentToken.equals("&&")){
+            throw new IllegalConditionException(blockType);
+        }
         do {
             verifyBlockConditionCases(blockType);
         } while (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING));
@@ -215,9 +220,18 @@ public class CompilationEngine {
             UninitializedVariableInConditionException, IllegalConditionException {
         String token = tokenizer.getCurrentToken();
         //System.out.println("token: " + token);
-        if (token.equals("||") ||
-                token.equals("&&")) {
+        if (token.equals("|") ||
+                token.equals("&")) {
             tokenizer.advance();
+            if (token.equals("|") || token.equals("&")) {
+                tokenizer.advance();
+                if (token.equals("|") ||
+                        token.equals("&")) {
+                    throw new IllegalConditionException(blockType);
+                }
+            }
+            tokenizer.advance();
+
         } else if (token.equals("true") ||
                 token.equals("false")) {
             // Case 1 : One of the reserved words is true or false.
@@ -523,8 +537,6 @@ public class CompilationEngine {
                 && !validDoublePattern.matcher(variableValue).matches()) {
             throw new InvalidValueException(variableName, variableValue, BOOLEAN);
         }
-        // TODO : Dont we need to add here - !validIntPattern.matcher(variableValue).matches() - ?
-        // Nir - No, double also catches int
     }
 
     private int verifyManyVariableDeclarations(String variableName, String currentToken) throws InvalidVariableDeclarationException {
