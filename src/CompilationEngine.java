@@ -80,11 +80,13 @@ public class CompilationEngine {
                 EmptyConditionException e) {
             System.out.println("1");
             System.err.print(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
     }
 
-    private void verifyFile() throws GlobalScopeException, InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, InvalidTypeException, FinalReturnException, InnerMethodDeclarationException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, CallFunctionFromGlobalException, IllegalBlockInGlobalScope, NonExistingVariableException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException, EmptyConditionException {
+    private void verifyFile() throws Exception, NonExistingFunctionException, NumberOfVarsInFuncCallException, IllegalBlockInGlobalScope, NonExistingVariableException, InvalidVariableAssignmentEception {
 
         String token = tokenizer.getCurrentToken();
         variablesTable.enterScope();
@@ -117,7 +119,6 @@ public class CompilationEngine {
             } else {
                     throw new GlobalScopeException();
             }
-
             token = tokenizer.getCurrentToken();
             variablesTable.printSymbolTable();
         }
@@ -125,8 +126,8 @@ public class CompilationEngine {
 
 
 
-    private void verifyFunctionDeclaration() throws InavlidVariableName, InvalidValueException,
-            InvalidVariableDeclarationException, InnerMethodDeclarationException, FinalReturnException, NonExistingFunctionException, IllegalReturnFormat, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException, EmptyConditionException {
+    private void verifyFunctionDeclaration() throws Exception,
+            NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
         boolean returnFlag = false;
         //Now token is void so move to function name
         tokenizer.advance();
@@ -179,7 +180,7 @@ public class CompilationEngine {
 
     }
 
-    private void varOrFunctionCallCase(String currToken) throws InavlidVariableName, NonExistingFunctionException, NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException, InvalidVariableDeclarationException, InvalidVariableAssignmentEception, InvalidValueException, ConstantAssignmentException {
+    private void varOrFunctionCallCase(String currToken) throws Exception, NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
         String nextToken;
         //System.out.println("token : " + currToken);
         if (verifyVariableName(tokenizer.getCurrentToken()).equals(currToken)) {
@@ -203,7 +204,7 @@ public class CompilationEngine {
         }
     }
 
-    private void verifyBlock(String blockType) throws InavlidVariableName, InvalidValueException, InnerMethodDeclarationException, InvalidVariableDeclarationException, NonExistingFunctionException, MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException, EmptyConditionException {
+    private void verifyBlock(String blockType) throws Exception, NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
         // Advance to (
         tokenizer.advance();
         // Advance to condition
@@ -222,10 +223,11 @@ public class CompilationEngine {
         if (!tokenizer.getCurrentToken().equals(BRACE_CLOSING)) {
             verifyInnerPartOfBlock();
         }
+
         tokenizer.advance();
     }
 
-    private void verifyInnerPartOfBlock() throws InnerMethodDeclarationException, InavlidVariableName, InvalidValueException, InvalidVariableDeclarationException, NonExistingFunctionException, MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException, InvalidVariableAssignmentEception, ConstantAssignmentException, EmptyConditionException {
+    private void verifyInnerPartOfBlock() throws Exception, NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
         String currToken = tokenizer.getCurrentToken();
 
         while (!currToken.equals(BRACE_CLOSING)) {
@@ -253,6 +255,7 @@ public class CompilationEngine {
     }
 
     private void verifyBlockCondition(String blockType) throws IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
+        // TODO: How to check that we dont have illegal way of using && and ||?
         do {
             verifyBlockConditionCases(blockType);
         } while (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING));
@@ -303,41 +306,12 @@ public class CompilationEngine {
 
     private void verifyFunctionCall() throws NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException {
         String functionName = tokenizer.getCurrentToken();
-        int varCounter = VARIABLE_NOT_DECLARED;
-        HashMap<Integer, String> functionVarsInfo =
-                functionTable.getFunctionVariables(functionName);
-        // Advance to '('
+        // Move to (
         tokenizer.advance();
-
-        // Check var validity
-        tokenizer.advance();
+        // Move to first var
         verifyFunctionCallVariables(functionName);
-        varCounter++;
-
-        tokenizer.advance();
-        while (tokenizer.getCurrentToken().equals(COMMA)){
-            if (varCounter >= functionVarsInfo.size()) {
-                throw new NumberOfVarsInFuncCallException("more", functionName);
-            }
-            verifyFunctionCallVariables(functionName);
-            varCounter++;
-            tokenizer.advance();
-        }
-
-        // Check ')'
-        tokenizer.advance();
-//        TODO: Check with nir - This case is handled in preProcessor? Nir - Yes, in processCleanedFile()
-//        if (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING)){
-//            // Raise ')' error -> missing symbol
-//        }
-
-        // Check var list length
-        if (varCounter < functionVarsInfo.size()) {
-            throw new NumberOfVarsInFuncCallException("less", functionName);
-        }
 
         // Check ;
-        // TODO: Did we check in preProcessor? Nir - check what?
         tokenizer.advance();
 
     }
@@ -345,20 +319,53 @@ public class CompilationEngine {
     //TODO : maybe ask nir how to handle.
     // Nir - check if variablesMap.getType(funcName) == functionsTable.getParameterType(funcName, parameterIndex)
     // Nir - for parameter assignment, check if variablesMap.getValue(variableName) != "null"
-    private void verifyFunctionCallVariables(String funcName) throws MissingVariableTypeInFunctionDeclarationException {
+    private void verifyFunctionCallVariables(String functionName) throws MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException {
 
-//        // Wrong ype case
-//        if (!tokenizer.tokenType().equals(KEYWORD)){
-//            // missing type error
-//            throw new MissingVariableTypeInFunctionDeclarationException(funcName);
-//        }
-        // check type validity and that they are assigned
+        int varCounter = 0;
+        HashMap<Integer, String> functionVarsInfo =
+                functionTable.getFunctionVariables(functionName);
+
+        // Check var validity
+        tokenizer.advance();
+        if (varCounter == functionVarsInfo.size() && !tokenizer.getCurrentToken().equals(BRACKET_CLOSING)) {
+            throw new NumberOfVarsInFuncCallException("more", functionName);
+        }
+        if ((varCounter < functionVarsInfo.size() && tokenizer.getCurrentToken().equals(BRACKET_CLOSING))) {
+            throw new NumberOfVarsInFuncCallException("less", functionName);
+        }
+
+        String currIndexType = functionVarsInfo.get(varCounter);
+        verifyTypeFunctionCall(tokenizer.getCurrentToken(), currIndexType);
+        varCounter++;
+        tokenizer.advance();
+
+        while (tokenizer.getCurrentToken().equals(COMMA)){
+            // Move past ,
+            tokenizer.advance();
+
+            if (varCounter == functionVarsInfo.size() && !tokenizer.getCurrentToken().equals(BRACKET_CLOSING)) {
+                throw new NumberOfVarsInFuncCallException("more", functionName);
+            }
+            if ((varCounter < functionVarsInfo.size() && tokenizer.getCurrentToken().equals(BRACKET_CLOSING))) {
+                throw new NumberOfVarsInFuncCallException("less", functionName);
+            }
+
+            currIndexType = functionVarsInfo.get(varCounter);
+            verifyTypeFunctionCall(tokenizer.getCurrentToken(), currIndexType);
+            varCounter++;
+            tokenizer.advance();
+        }
+
+        tokenizer.advance();
+
+    }
+
+    private void verifyTypeFunctionCall(String currentToken, String currIndexType) {
 
     }
 
 
-    private void verifyVariableDeclaration(String token, boolean isConstant) throws InavlidVariableName,
-            InvalidVariableDeclarationException, InvalidValueException, ConstantAssignmentException {
+    private void verifyVariableDeclaration(String token, boolean isConstant) throws Exception {
         // Whether final or not, now the token is on the type
         switch (token) {
             case INT:
@@ -383,7 +390,7 @@ public class CompilationEngine {
 
     }
 
-    private void verifyVariableAssignment() throws InavlidVariableName, InvalidVariableDeclarationException, InvalidVariableAssignmentEception, InvalidValueException, ConstantAssignmentException {
+    private void verifyVariableAssignment() throws Exception, InvalidVariableAssignmentEception {
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
             String variableName = tokenizer.getCurrentToken();
             variablesTable.findVariableScope(variableName); // throws if variable not declared
@@ -423,7 +430,7 @@ public class CompilationEngine {
     }
 
     private void verifyVariable(String type, Pattern valuePattern, boolean isConstant)
-            throws InvalidVariableDeclarationException, InvalidValueException, InavlidVariableName, ConstantAssignmentException {
+            throws Exception {
         if (isConstant) {
             tokenizer.advance(); // Move to the variable name
         }
@@ -450,7 +457,7 @@ public class CompilationEngine {
     }
 
     private int processVariableWithValue(String variableName, String type, Pattern valuePattern, boolean isConstant, boolean isAssignment)
-            throws InvalidValueException, InvalidVariableDeclarationException, ConstantAssignmentException {
+            throws Exception {
         tokenizer.advance(); // Move to the value
 
         String variableValue = tokenizer.getCurrentToken();
@@ -461,12 +468,47 @@ public class CompilationEngine {
         }
 
         // Validate the value
-//        if (type.equals(CHAR)) {
-//            variableValue = "'" + variableValue + "'";
-//        }
-//        if (type.equals(STRING)) {
-//            variableValue = "\"" + variableValue + "\"";
-//        }
+        if (type.equals(CHAR)) {
+            if (!tokenizer.getCurrentToken().equals("'"))
+            {
+                //raise error
+                throw new Exception("char start");
+            }
+            tokenizer.advance();
+            variableValue = tokenizer.getCurrentToken();
+            if (variableValue.length() != 1){
+                throw new Exception("char length");
+            }
+            tokenizer.advance();
+            if (!tokenizer.getCurrentToken().equals("'"))
+            {
+                //raise error
+                throw new Exception("char end");
+            }
+        }
+
+        if (type.equals(STRING)) {
+            if (!tokenizer.getCurrentToken().equals("\""))
+            {
+                //raise error
+                throw new Exception("String start");
+            }
+            tokenizer.advance();
+            variableValue = tokenizer.getCurrentToken();
+            if (!variableValue.isEmpty()) {
+                //TODO : do we need it?
+                verifyString(variableValue);
+                tokenizer.advance();
+            }
+
+            if (!tokenizer.getCurrentToken().equals("\""))
+            {
+                //raise error
+                throw new Exception("String end");
+            }
+
+        }
+
         validateVariableValue(variableName, type, valuePattern, variableValue);
 
         // Add the variable to the symbol table
@@ -479,6 +521,13 @@ public class CompilationEngine {
         tokenizer.advance(); // Move past the value
         // Verify if there are more declarations or end of line
         return verifyManyVariableDeclarations(variableName, tokenizer.getCurrentToken());
+    }
+
+    private void verifyString(String variableValue) throws Exception {
+        if (!validStringPattern.matcher(variableValue).matches()){
+            // Raise String pattern error
+            throw new Exception("String pattern");
+        }
     }
 
     private String resolveVariableReference(String variableValue) {

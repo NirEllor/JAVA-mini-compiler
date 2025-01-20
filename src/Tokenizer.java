@@ -136,6 +136,10 @@ public class Tokenizer {
         }
     }
 
+    public String[] getCurrentTokenArray() {
+        return tokensList.toArray(new String[0]);
+    }
+
     public static void main(String[] args) {
         String[] input = new String[]{"int -_a1 = -1.;", "\'yuli\'"};
         Tokenizer tokenizer = new Tokenizer(input);

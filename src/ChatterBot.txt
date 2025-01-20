@@ -45,7 +45,7 @@
 //int a = 5
 // Problematic - return a nullPointerException instead of Compilation
 
-//String a = "45";
+String a = "yuli";
 
 
 //char c = '4';
@@ -56,7 +56,7 @@ void function(int a){
     i=2;
     if(true){
         i=5;
-        function(5);
+        function(6);
     }
     return;
 }
