@@ -121,9 +121,7 @@ public class Tokenizer {
     }
 
     public void lookAhead() {
-        if (lookAheadBuffer == null) {
-            lookAheadBuffer = new Object[]{lineIndex, new ArrayList<>(tokensList), currentToken};
-        }
+        lookAheadBuffer = new Object[]{lineIndex, new ArrayList<>(tokensList), currentToken};
         advance();
     }
 

@@ -485,7 +485,11 @@ public class CompilationEngine {
         else {
             variablesTable.declareVariable(variableName, type, variableValue, isConstant);
         }
+//        System.out.println(variableValue);
+//        System.out.println(tokenizer.getCurrentToken());
+        System.out.println("after double check " + tokenizer.getCurrentToken());
         tokenizer.advance(); // Move past the value
+//        System.out.println(tokenizer.getCurrentToken());
         // Verify if there are more declarations or end of line
         return verifyManyVariableDeclarations(variableName, tokenizer.getCurrentToken());
     }
@@ -542,10 +546,12 @@ public class CompilationEngine {
                 tmp = tokenizer.getCurrentToken();
                 if (validIntPattern.matcher(tmp).matches()) {
                     result += tmp;
-                } else if (!AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
-                    throw new InvalidValueException(variableName,tmp, type);
-                } else {
+                } else if (AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
                     tokenizer.retreat();
+//                    tokenizer.advance();
+                    System.out.println(tokenizer.getCurrentToken());
+                } else {
+                    throw new InvalidValueException(variableName,tmp, type);
                 }
             } else if (!AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
                 throw new InvalidValueException(variableName,tmp, type);
@@ -553,12 +559,13 @@ public class CompilationEngine {
                 tokenizer.retreat();
             }
         } else if (tmp.equals(DOT)) {
-            result += tmp;
             tokenizer.lookAhead();
             tmp = tokenizer.getCurrentToken();
             if (validIntPattern.matcher(tmp).matches()) {
                 result += tmp;
             } else {
+                tokenizer.retreat();
+                tmp = tokenizer.getCurrentToken();
                 throw new InvalidValueException(variableName,tmp, type);
             }
         } else {
@@ -577,7 +584,7 @@ public class CompilationEngine {
     }
 
     private int verifyManyVariableDeclarations(String variableName, String currentToken) throws InvalidVariableDeclarationException {
-
+        System.out.println(currentToken);
         switch (currentToken) {
             case EOL_COMMA:
                 return END_OF_LINE;

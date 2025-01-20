@@ -58,10 +58,11 @@
 
 //String s = "";
 
-//double a = 0; good
-//double b = 0.1; good
-//double c = 0.; bad
-//double d = 0.; bad
-//double e = .5; bad
-// double f = .; bad - matter of exception
+//double a = 0;
+//double d = 0.;
+//double e = .0;
+//double a = 0.0;
+double f = .;
+//int a = true;
+//double a = "ag;
 
