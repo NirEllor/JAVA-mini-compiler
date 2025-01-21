@@ -1,5 +1,3 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -27,7 +25,7 @@ public class JavaVerifier {
             System.out.print("preprocessor failed");
         }
         else {
-            CompilationEngine engine = new CompilationEngine(output, functionsTable);
+            VerificationEngine engine = new VerificationEngine(output, functionsTable);
         }
 //        System.out.println(output);
 

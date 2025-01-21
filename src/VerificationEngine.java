@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class CompilationEngine {
+public class VerificationEngine {
 
     public static final String VOID = "void";
     public static final String FINAL = "final";
@@ -22,6 +22,7 @@ public class CompilationEngine {
     public static final int GLOBAL_SCOPE = 1;
     public static final int VARIABLE_NOT_DECLARED = 0;
     public static final String DOT = ".";
+    private static final String BRACKET_CLOSING = ")";
 
     private FunctionsTable functionTable;
     private SymbolTable variablesTable;
@@ -30,7 +31,6 @@ public class CompilationEngine {
     public static final String BOOLEAN = "boolean";
     public static final String DOUBLE = "double";
     public static final String STRING = "String";
-    public static final String BRACKET_CLOSING = ")";
     public static final String BRACE_CLOSING = "}";
     public static final String IF = "if";
     public static final String WHILE = "while";
@@ -60,7 +60,7 @@ public class CompilationEngine {
             ";", ")", ",", "|", "&"));
 
 
-    public CompilationEngine(String path, FunctionsTable functionTable) {
+    public VerificationEngine(String path, FunctionsTable functionTable) {
         try(FileReader fileReader = new FileReader(path);
                 BufferedReader bufferedReader = new BufferedReader(fileReader))
         {
@@ -129,9 +129,88 @@ public class CompilationEngine {
 
 
     private void verifyFunctionDeclaration() throws Exception,
-            NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
+            NonExistingFunctionException, InvalidVariableAssignmentEception, NumberOfVarsInFuncCallException {
 
+        boolean returnFlag = false;
+        boolean finalFlag = false;
+        //Now token is void so move to function name
+        tokenizer.advance();
+        //Now token is ( so move to parameters declaration
+        tokenizer.advance();
+        tokenizer.advance();
+        String paramType, paramName;
+        //Now we have var dec, so move past it (verification was handled is preProcessor)
+        while (!this.tokenizer.getCurrentToken().equals(BRACKET_CLOSING)){
+            paramType = tokenizer.getCurrentToken();
+            if (paramType.equals("final")){
+                finalFlag = true;
+                tokenizer.advance();
+                paramType = tokenizer.getCurrentToken();
+            }
+            tokenizer.advance();
+            paramName = tokenizer.getCurrentToken();
+            variablesTable.declareVariable(paramName, paramType, null, finalFlag);
+            tokenizer.advance();
+            System.out.println("After var dec: " + tokenizer.getCurrentToken());
+            if (tokenizer.getCurrentToken().equals(",")){
+                tokenizer.advance();
+            }
+        }
+
+        // Advance to {
+        tokenizer.advance();
+        //variablesTable.enterScope();
+
+        //Now advance and handle what's in the method
+        tokenizer.advance();
+
+        String currToken = tokenizer.getCurrentToken();
+
+        while (!currToken.equals(BRACE_CLOSING))
+        {
+
+            if (TYPES.contains(currToken)) {
+                // Local variable declaration case
+                verifyVariableDeclaration(currToken, false);
+            }
+
+            if (currToken.equals(IF)) {
+                // If block case
+                verifyBlock(IF);
+            }
+
+            if (currToken.equals(WHILE)) {
+                // While block case
+                verifyBlock(WHILE);
+            }
+
+            if (currToken.equals(RETURN)) {
+                // Return statement
+                returnFlag = verifyReturnStatement();
+            }
+
+            // Method declaration inside another method error
+            if (currToken.equals(VOID)) {
+                // Raise inner method declaration error
+                throw new InnerMethodDeclarationException();
+            }
+
+            varOrFunctionCallCase(currToken);
+
+            //TODO: How to check that the closing } is in separated row? maybe is preProcessor?
+
+            currToken = tokenizer.getCurrentToken();
+        }
+
+        // Ensure we have last return;
+        if (!returnFlag) {
+            //raise missing last return error
+            throw new FinalReturnException();
+        }
+
+        //variablesTable.exitScope();
     }
+
 
     private void varOrFunctionCallCase(String currToken) throws Exception, NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
         String nextToken;
@@ -172,6 +251,7 @@ public class CompilationEngine {
         tokenizer.advance();
         // Advance to after {
         tokenizer.advance();
+
         // Advance to verify the inner part of the block
         if (!tokenizer.getCurrentToken().equals(BRACE_CLOSING)) {
             verifyInnerPartOfBlock();
@@ -184,7 +264,7 @@ public class CompilationEngine {
         String currToken = tokenizer.getCurrentToken();
 
         while (!currToken.equals(BRACE_CLOSING)) {
-            if (TYPES.contains(currToken)) {
+            if (TYPES.contains(currToken) || currToken.equals(FINAL)) {
                 // Local variable declaration case
                 tokenizer.advance();
                 verifyVariableDeclaration(currToken, false);
@@ -211,29 +291,36 @@ public class CompilationEngine {
         // TODO: How to check that we dont have illegal way of using && and ||?
         String currentToken = tokenizer.getCurrentToken();
         // TODO: change
-        if (currentToken.equals("||") || currentToken.equals("&&")){
+        if (currentToken.equals("|") || currentToken.equals("&")){
             throw new IllegalConditionException(blockType);
         }
-        do {
+        System.out.println("Im her - " + tokenizer.getCurrentToken());
+        verifyBlockConditionCases(blockType);
+        while (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING)){
+            System.out.println("Im her - " + tokenizer.getCurrentToken());
             verifyBlockConditionCases(blockType);
-        } while (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING));
+        }
     }
 
     private void verifyBlockConditionCases(String blockType) throws IllegalVarTypeInConditionException,
             UninitializedVariableInConditionException, IllegalConditionException {
         String token = tokenizer.getCurrentToken();
+
+        System.out.println("in with " + token);
+
         //System.out.println("token: " + token);
         if (token.equals("|") ||
                 token.equals("&")) {
             tokenizer.advance();
+            token = tokenizer.getCurrentToken();
             if (token.equals("|") || token.equals("&")) {
                 tokenizer.advance();
-                if (token.equals("|") ||
-                        token.equals("&")) {
+                token = tokenizer.getCurrentToken();
+                if (token.equals("|") || token.equals("&") || token.equals(")")) {
                     throw new IllegalConditionException(blockType);
                 }
             }
-            tokenizer.advance();
+            //tokenizer.advance();
 
         } else if (token.equals("true") ||
                 token.equals("false")) {
@@ -271,7 +358,7 @@ public class CompilationEngine {
         return (tokenizer.getCurrentToken().equals(BRACE_CLOSING));
     }
 
-    private void verifyFunctionCall() throws NumberOfVarsInFuncCallException, MissingVariableTypeInFunctionDeclarationException {
+    private void verifyFunctionCall() throws NumberOfVarsInFuncCallException, Exception {
         String functionName = tokenizer.getCurrentToken();
         // Move to (
         tokenizer.advance();
@@ -286,7 +373,7 @@ public class CompilationEngine {
     //TODO : maybe ask nir how to handle.
     // Nir - check if variablesMap.getType(funcName) == functionsTable.getParameterType(funcName, parameterIndex)
     // Nir - for parameter assignment, check if variablesMap.getValue(variableName) != "null"
-    private void verifyFunctionCallVariables(String functionName) throws MissingVariableTypeInFunctionDeclarationException, NumberOfVarsInFuncCallException {
+    private void verifyFunctionCallVariables(String functionName) throws Exception, NumberOfVarsInFuncCallException {
 
         int varCounter = 0;
         HashMap<Integer, String> functionVarsInfo =
@@ -302,7 +389,8 @@ public class CompilationEngine {
         }
 
         String currIndexType = functionVarsInfo.get(varCounter);
-        verifyTypeFunctionCall(tokenizer.getCurrentToken(), currIndexType);
+        String currValue = tokenizer.getCurrentToken();
+        currValue = verifyTypeFunctionCall(tokenizer.getCurrentToken(), currIndexType);
         varCounter++;
         tokenizer.advance();
 
@@ -318,7 +406,7 @@ public class CompilationEngine {
             }
 
             currIndexType = functionVarsInfo.get(varCounter);
-            verifyTypeFunctionCall(tokenizer.getCurrentToken(), currIndexType);
+            currValue = verifyTypeFunctionCall(tokenizer.getCurrentToken(), currIndexType);
             varCounter++;
             tokenizer.advance();
         }
@@ -327,8 +415,25 @@ public class CompilationEngine {
 
     }
 
-    private void verifyTypeFunctionCall(String currentToken, String currIndexType) {
-
+    private String verifyTypeFunctionCall(String currentToken, String currIndexType) throws Exception {
+        switch (currIndexType) {
+            case DOUBLE-> {
+                return handleDoubleValues("function call var", currentToken, currentToken);
+            }
+            case INT -> {
+                //TODO: only int!
+            }
+            case STRING -> {
+                return handleStringValues();
+            }
+            case BOOLEAN -> {
+                handleBooleanValues("function call var", currentToken);
+            }
+            case CHAR -> {
+                return handleCharValues(currentToken);
+            }
+        }
+        return null;
     }
 
 

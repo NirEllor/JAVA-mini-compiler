@@ -67,6 +67,13 @@
 //int a = true;
 //double a = "ag;
 //char a = 's';
-void foo(a) {
+
+void foo(int a, int c) {
+    a=7;
+    c=5;
+    if (a || 2){
+        foo(2.5);
+    }
+    return;
 }
 

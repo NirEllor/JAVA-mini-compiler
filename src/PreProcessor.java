@@ -1,8 +1,10 @@
 import java.io.*;
+import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.regex.*;
 
 public class PreProcessor {
+    public static final String VOID = "void";
     final double PI = 3.14;
     private final String filePath;
     public String cleanedFilePath = "src/CleanedChatterBot.txt";
@@ -62,15 +64,21 @@ public class PreProcessor {
                 if (line.contains("}") && line.length() > 1) {
                     throw new ClosingRightBraceException(line);
                 }
-                Matcher functionMatcher = validFunctionPattern.matcher(line);
-                while (functionMatcher.find()) {
-                    String functionName = functionMatcher.group(1);
-                    if (isReservedKeyword(functionName)) {
-                        break;
+                if (line.startsWith(VOID)){
+                    Matcher functionMatcher = validFunctionPattern.matcher(line);
+                    if (!line.contains("(") || !line.contains(")")) {
+                        throw new FunctionDeclarationException(line);
                     }
-                    String params = functionMatcher.group(2);
-                    ArrayList<String> paramTypes = parseParameterTypes(params);
-                    functionsTable.addFunction(functionName, paramTypes);  // Use FunctionsTable instance
+                    while (functionMatcher.find()) {
+                        String functionName = functionMatcher.group(1);
+                        if (isReservedKeyword(functionName)) {
+                            throw new FunctionDeclarationException(line);
+                        }
+                        String params = functionMatcher.group(2);
+                        System.out.println(params);
+                        ArrayList<String> paramTypes = parseParameterTypes(params, line);
+                        functionsTable.addFunction(functionName, paramTypes);  // Use FunctionsTable instance
+                    }
                 }
 
                 // Validate parentheses
@@ -92,11 +100,17 @@ public class PreProcessor {
             } else {
                 System.out.println("All parentheses are balanced.");
             }
-        } catch (FunctionException | EndOfLineException | UnbalancedParenthesesException |
+        } catch (EndOfLineException | UnbalancedParenthesesException |
                  ClosingRightBraceException e) {
             System.out.println("1");
             System.err.println(e.getMessage());
             cleanedFilePath = "";
+        } catch (FunctionDeclarationException e) {
+            throw new RuntimeException(e);
+        } catch (FunctionException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidFunctionParameterException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -105,7 +119,7 @@ public class PreProcessor {
     }
 
     // Parses a parameter list and returns an ArrayList of parameter types
-    private ArrayList<String> parseParameterTypes(String params) {
+    private ArrayList<String> parseParameterTypes(String params, String line) throws InvalidFunctionParameterException {
         ArrayList<String> paramTypes = new ArrayList<>();
         if (params.trim().isEmpty()) {
             return paramTypes;
@@ -114,8 +128,10 @@ public class PreProcessor {
         for (String param : paramArray) {
             param = param.trim();
             String[] parts = param.split("\\s+");
-            if (parts.length > 1 && validVariablePattern.matcher(parts[1]).matches() && TYPES.contains(parts[0])) {
+            if (parts.length == 2 && validVariablePattern.matcher(parts[1]).matches() && TYPES.contains(parts[0])) {
                 paramTypes.add(parts[0]);  // Add the type (first part) to the list
+            } else {
+                throw new InvalidFunctionParameterException(line);
             }
         }
         return paramTypes;
