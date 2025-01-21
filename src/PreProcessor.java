@@ -5,7 +5,7 @@ import java.util.regex.*;
 
 public class PreProcessor {
     public static final String VOID = "void";
-    final double PI = 3.14;
+    private static final String FINAL = "final";
     private final String filePath;
     public String cleanedFilePath = "src/CleanedChatterBot.txt";
     private final FunctionsTable functionsTable;  // Instance of FunctionsTable
@@ -64,6 +64,7 @@ public class PreProcessor {
                 if (line.contains("}") && line.length() > 1) {
                     throw new ClosingRightBraceException(line);
                 }
+
                 if (line.startsWith(VOID)){
                     Matcher functionMatcher = validFunctionPattern.matcher(line);
                     if (!line.contains("(") || !line.contains(")")) {
@@ -71,11 +72,10 @@ public class PreProcessor {
                     }
                     while (functionMatcher.find()) {
                         String functionName = functionMatcher.group(1);
-                        if (isReservedKeyword(functionName)) {
-                            throw new FunctionDeclarationException(line);
-                        }
+//                        if (isReservedKeyword(functionName)) {
+//                            throw new FunctionDeclarationException(line);
+//                        }
                         String params = functionMatcher.group(2);
-                        System.out.println(params);
                         ArrayList<String> paramTypes = parseParameterTypes(params, line);
                         functionsTable.addFunction(functionName, paramTypes);  // Use FunctionsTable instance
                     }
@@ -101,16 +101,11 @@ public class PreProcessor {
                 System.out.println("All parentheses are balanced.");
             }
         } catch (EndOfLineException | UnbalancedParenthesesException |
-                 ClosingRightBraceException e) {
+                 ClosingRightBraceException | FunctionDeclarationException |
+                 InvalidFunctionParameterException | FunctionException e) {
             System.out.println("1");
             System.err.println(e.getMessage());
             cleanedFilePath = "";
-        } catch (FunctionDeclarationException e) {
-            throw new RuntimeException(e);
-        } catch (FunctionException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidFunctionParameterException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -130,6 +125,9 @@ public class PreProcessor {
             String[] parts = param.split("\\s+");
             if (parts.length == 2 && validVariablePattern.matcher(parts[1]).matches() && TYPES.contains(parts[0])) {
                 paramTypes.add(parts[0]);  // Add the type (first part) to the list
+            } else if (parts.length == 3 && validVariablePattern.matcher(parts[2]).matches() &&
+                    TYPES.contains(parts[1]) && parts[0].equals(FINAL)){
+                    //TODO: how to handle final?
             } else {
                 throw new InvalidFunctionParameterException(line);
             }

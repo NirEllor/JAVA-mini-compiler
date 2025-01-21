@@ -2,7 +2,7 @@ void foo(int a, int c) {
     a=7;
     c=5;
     if (a || 2){
-        foo(2.5);
+        foo(2);
     }
     return;
 }
