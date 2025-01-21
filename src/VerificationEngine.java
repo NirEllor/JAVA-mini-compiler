@@ -422,6 +422,7 @@ public class VerificationEngine {
             }
             case INT -> {
                 //TODO: only int!
+                //
             }
             case STRING -> {
                 return handleStringValues();
