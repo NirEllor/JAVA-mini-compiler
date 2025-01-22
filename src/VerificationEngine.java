@@ -443,7 +443,6 @@ public class VerificationEngine {
         if (validIntPattern.matcher(tokenizer.getCurrentToken()).matches()) {
             tokenizer.lookAhead();
             if (tokenizer.getCurrentToken().equals(DOT)){
-                //TODO: fix message
                 throw new InvalidValueException(variableName, INT);
             } else {
                 tokenizer.retreat();
@@ -624,7 +623,7 @@ public class VerificationEngine {
         }
         tokenizer.advance();
         String variableValue = tokenizer.getCurrentToken();
-        if (!variableValue.isEmpty()) {
+        if (!variableValue.equals("\"")) {
             //TODO : do we need it?
             //verifyString(variableValue);
             result = variableValue;

@@ -1,5 +1,1 @@
-int a = 6.5;
-void foo(final int a) {
-    a = 5;
-    return;
-    }
+String s = "";
