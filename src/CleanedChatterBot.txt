@@ -1,6 +1,5 @@
-final int d = 2;
-void foo(int a, int c) {
-    final int b = 5;
-    b = 7;
+int a = 6.5;
+void foo(final int a) {
+    a = 5;
     return;
- }
+    }

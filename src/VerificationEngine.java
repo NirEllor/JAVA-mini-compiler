@@ -149,7 +149,6 @@ public class VerificationEngine {
             }
             tokenizer.advance();
             paramName = tokenizer.getCurrentToken();
-            //TODO: How to handle final?
             variablesTable.declareVariable(paramName, paramType, null, finalFlag, true);
             tokenizer.advance();
 //            System.out.println("After var dec: " + tokenizer.getCurrentToken());
@@ -207,7 +206,6 @@ public class VerificationEngine {
 
             varOrFunctionCallCase(currToken);
 
-            //TODO: How to check that the closing } is in separated row? maybe is preProcessor?
 
             currToken = tokenizer.getCurrentToken();
         }
@@ -306,9 +304,7 @@ public class VerificationEngine {
     }
 
     private void verifyBlockCondition(String blockType) throws IllegalVarTypeInConditionException, UninitializedVariableInConditionException, IllegalConditionException {
-        // TODO: How to check that we dont have illegal way of using && and ||?
         String currentToken = tokenizer.getCurrentToken();
-        // TODO: change
         if (currentToken.equals("|") || currentToken.equals("&")){
             throw new IllegalConditionException(blockType);
         }
@@ -388,9 +384,6 @@ public class VerificationEngine {
 
     }
 
-    //TODO : maybe ask nir how to handle.
-    // Nir - check if variablesMap.getType(funcName) == functionsTable.getParameterType(funcName, parameterIndex)
-    // Nir - for parameter assignment, check if variablesMap.getValue(variableName) != "null"
     private void verifyFunctionCallVariables(String functionName) throws Exception, NumberOfVarsInFuncCallException {
 
         int varCounter = 0;
@@ -426,7 +419,6 @@ public class VerificationEngine {
     private String verifyTypeFunctionCall(String currentToken, String currIndexType) throws Exception {
         switch (currIndexType) {
             case INT -> {
-                //TODO: only int!
                 return handleIntValue("function call var");
             }
             case DOUBLE-> {
@@ -452,12 +444,12 @@ public class VerificationEngine {
             tokenizer.lookAhead();
             if (tokenizer.getCurrentToken().equals(DOT)){
                 //TODO: fix message
-                throw new InvalidValueException(variableName, result + tokenizer.getCurrentToken(), INT);
+                throw new InvalidValueException(variableName, INT);
             } else {
                 tokenizer.retreat();
             }
         } else {
-            throw new InvalidValueException(variableName, tokenizer.getCurrentToken(), INT);
+            throw new InvalidValueException(variableName, INT);
         }
         return result;
     }
@@ -616,7 +608,7 @@ public class VerificationEngine {
                 return handleBooleanValues(variableName, variableValue);
             default:
                 if (!valuePattern.matcher(variableValue).matches()) {
-                    throw new InvalidValueException(variableName, variableValue, type);
+                    throw new InvalidValueException(variableName, type);
                 }
                 return variableValue;
         }
@@ -628,7 +620,7 @@ public class VerificationEngine {
 
         if (!tokenizer.getCurrentToken().equals("\"")) {
             //raise error
-            throw new InvalidValueException(variableName, tokenizer.getCurrentToken(), STRING);
+            throw new InvalidValueException(variableName, STRING);
         }
         tokenizer.advance();
         String variableValue = tokenizer.getCurrentToken();
@@ -641,7 +633,7 @@ public class VerificationEngine {
 
         if (!tokenizer.getCurrentToken().equals("\"")) {
             //raise error
-            throw new InvalidValueException(variableName, tokenizer.getCurrentToken(), STRING);
+            throw new InvalidValueException(variableName, STRING);
         }
 
         return result;
@@ -651,18 +643,18 @@ public class VerificationEngine {
         if (!tokenizer.getCurrentToken().equals("'"))
         {
             //raise error
-            throw new InvalidValueException(variableName, tokenizer.getCurrentToken(), STRING);
+            throw new InvalidValueException(variableName, STRING);
         }
         tokenizer.advance();
         String result = tokenizer.getCurrentToken();
         if (tokenizer.getCurrentToken().length() != 1){
-            throw new InvalidValueException(variableName, tokenizer.getCurrentToken(), CHAR);
+            throw new InvalidValueException(variableName, CHAR);
         }
         tokenizer.advance();
         if (!tokenizer.getCurrentToken().equals("'"))
         {
             //raise error
-            throw new InvalidValueException(variableName, tokenizer.getCurrentToken(), CHAR);
+            throw new InvalidValueException(variableName, CHAR);
         }
         return result;
     }
@@ -684,10 +676,10 @@ public class VerificationEngine {
 //                    tokenizer.advance();
 //                    System.out.println(tokenizer.getCurrentToken());
                 } else {
-                    throw new InvalidValueException(variableName,tmp, DOUBLE);
+                    throw new InvalidValueException(variableName, DOUBLE);
                 }
             } else if (!AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
-                throw new InvalidValueException(variableName,tmp, DOUBLE);
+                throw new InvalidValueException(variableName, DOUBLE);
             } else {
                 tokenizer.retreat();
             }
@@ -699,10 +691,10 @@ public class VerificationEngine {
             } else {
                 tokenizer.retreat();
                 tmp = tokenizer.getCurrentToken();
-                throw new InvalidValueException(variableName,tmp, DOUBLE);
+                throw new InvalidValueException(variableName, DOUBLE);
             }
         } else {
-            throw new InvalidValueException(variableName, variableValue, DOUBLE);
+            throw new InvalidValueException(variableName, DOUBLE);
         }
         return result;
     }
