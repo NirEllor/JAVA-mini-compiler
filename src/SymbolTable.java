@@ -29,6 +29,7 @@ public class SymbolTable {
     public void enterScope() {
         currentScope++;
         variablesMap.put(currentScope, new HashMap<>());
+        printSymbolTable();
     }
 
     public int getCurrentScope() {
@@ -41,12 +42,14 @@ public class SymbolTable {
         printSymbolTable();
         variablesMap.remove(currentScope);
         currentScope--;
-        HashMap<String, Triple> globalVariables = variablesMap.get(0);
+        HashMap<String, Triple> globalVariables = variablesMap.get(1);
         if (globalVariables != null) {
             for (Map.Entry<String, Triple> entry : globalVariables.entrySet()) {
+//                System.out.println(entry.getValue().globalVariableValuesStack);
                 if (entry.getValue().lastUpdatedScope == getCurrentScope()) {
-                    entry.getValue().globalVariableValuesStack.pop();
+//                    entry.getValue().globalVariableValuesStack.pop();
                     entry.getValue().lastUpdatedScope--;
+//                    System.out.println(entry.getValue().globalVariableValuesStack);
                     entry.getValue().value = entry.getValue().globalVariableValuesStack.peek();
                 }
             }
@@ -54,14 +57,15 @@ public class SymbolTable {
 
     }
 
-    public void declareVariable(String name, String type, String value, boolean isConstant, boolean isParameter) {
+    public void declareVariable(String name, String type, String value, boolean isConstant, boolean isParameter)
+            throws VariableAlreadyDeclaredException, ConstantNonAssignmentException {
         HashMap<String, Triple> currentScopeMap = variablesMap.get(currentScope);
 
         if (currentScopeMap.containsKey(name)) {
-            throw new IllegalArgumentException("Variable '" + name + "' already declared in the current scope");
+            throw new VariableAlreadyDeclaredException(name);
         }
         if (isConstant && value == null && !isParameter) {
-            throw new IllegalArgumentException("Constant variable cannot be null");
+            throw new ConstantNonAssignmentException(name);
         }
 
         currentScopeMap.put(name, new Triple(type, value, isConstant));
@@ -71,8 +75,11 @@ public class SymbolTable {
         }
     }
 
-    public void assignValue(String name, String value) throws ConstantAssignmentException {
+    public void assignValue(String name, String value) throws ConstantAssignmentException, UninitializedGlobalVariableException {
         int scope = findVariableScope(name); // might throw if not assigned
+        if (scope == 1 && getCurrentScope() != 1 && getValue(name) == null) {
+            throw new UninitializedGlobalVariableException(name);
+        }
         if (variablesMap.get(scope).get(name).isConstant) {
             throw new ConstantAssignmentException(name);
         }
@@ -145,6 +152,8 @@ public class SymbolTable {
                 st.assignValue("x", "2"); // Expected to throw
             } catch (ConstantAssignmentException e) {
                 System.err.println(e.getMessage()); // Ignored for testing purposes
+            } catch (UninitializedGlobalVariableException e) {
+                e.getMessage();
             }
 
             // Test 3: Declare and assign in nested scope
@@ -155,7 +164,7 @@ public class SymbolTable {
             System.out.println("Assigned new value to y in scope 2: " + st.getValue("y"));
 
             // Test 4: Shadowing variable in a nested scope
-            st.declareVariable("x", "int", "y", false, true);
+            st.declareVariable("x", "int", null, false, true);
             System.out.println("Declared x in scope 2 (shadowed)");
 //            st.assignValue("x", 20);
             System.out.println("Assigned new value to x in scope 2: " + st.getValue("x"));
@@ -168,6 +177,10 @@ public class SymbolTable {
         } catch (Exception e) {
             // Catch-all for unexpected issues
             System.err.println("Test encountered an unexpected error: " + e.getMessage());
+        } catch (VariableAlreadyDeclaredException | ConstantNonAssignmentException e) {
+            e.getMessage();
+        } catch (UninitializedGlobalVariableException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -68,7 +68,7 @@ public class Tokenizer {
                 lineIndex++;
                 if (lineIndex < inputCleanedLines.length) {
                     tokensList = getTokensFromLine(inputCleanedLines[lineIndex]);
-//                    System.out.println(tokensList.toString());
+                    System.out.println(tokensList.toString());
                     continue;
                 } else {
                     currentToken = null;

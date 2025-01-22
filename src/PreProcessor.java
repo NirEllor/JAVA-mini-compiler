@@ -29,7 +29,7 @@ public class PreProcessor {
     }
 
     // Cleans the file by removing comments and empty lines
-    public void cleanFile() throws IOException {
+    public void cleanFile() throws IOException, InvalidCommentException {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath));
              BufferedWriter writer = new BufferedWriter(new FileWriter(cleanedFilePath))) {
@@ -39,11 +39,22 @@ public class PreProcessor {
                 if (commentPattern.matcher(line).matches()) {
                     continue;
                 }
+                if (!checkInvalidComments(line)) {
+                    throw new InvalidCommentException();
+
+                }
                 writer.write(line);
                 writer.newLine();
             }
         }
 
+    }
+
+    private boolean checkInvalidComments(String line)  {
+        if ((line.length() == 1 && line.charAt(0) == '/') ||
+                (line.length() >= 2 && line.charAt(0) == '/' && line.charAt(1) != '/')) {
+            return false;
+        } else return !line.endsWith("*/") || line.startsWith("//");
     }
 
     // Processes the cleaned file to collect function names and validate parentheses
@@ -96,9 +107,9 @@ public class PreProcessor {
             }
         } catch (EndOfLineException | UnbalancedParenthesesException |
                  ClosingRightBraceException | FunctionDeclarationException |
-                 InvalidFunctionParameterException | FunctionException e) {
+                 InvalidFunctionParameterException | FunctionAlreadyDeclaredException e) {
             System.out.println("1");
-            System.err.println(e.getMessage());
+            System.err.print(e.getMessage());
             cleanedFilePath = "";
         }
     }
@@ -141,6 +152,10 @@ public class PreProcessor {
             processCleanedFile();
         } catch (IOException e) {
             System.err.println("Couldn't open file" + " " + filePath + " ");
+            cleanedFilePath = "";
+        } catch (InvalidCommentException e) {
+            System.out.println("1");
+            System.err.print(e.getMessage());
             cleanedFilePath = "";
         }
         return cleanedFilePath;

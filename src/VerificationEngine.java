@@ -73,22 +73,21 @@ public class VerificationEngine {
         } catch (IOException e){
             System.out.print("2");
         } catch (GlobalScopeException | InavlidVariableName | InvalidVariableDeclarationException |
-                 InvalidValueException | FinalReturnException | InvalidTypeException |
+                 InvalidValueException | FinalReturnException |
                  InnerMethodDeclarationException | NonExistingFunctionException | IllegalReturnFormat |
-                 NumberOfVarsInFuncCallException | MissingVariableTypeInFunctionDeclarationException |
+                 NumberOfVarsInFuncCallException |
                  CallFunctionFromGlobalException | NonExistingVariableException | IllegalBlockInGlobalScope |
                  IllegalVarTypeInConditionException | UninitializedVariableInConditionException |
                  IllegalConditionException | InvalidVariableAssignmentEception | ConstantAssignmentException |
-                EmptyConditionException e) {
+                 VariableAlreadyDeclaredException | EmptyConditionException | ConstantNonAssignmentException
+                | UninitializedGlobalVariableException e) {
             System.out.println("1");
             System.err.print(e.getMessage());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
 
     }
 
-    private void verifyFile() throws Exception, NonExistingFunctionException, NumberOfVarsInFuncCallException, IllegalBlockInGlobalScope, NonExistingVariableException, InvalidVariableAssignmentEception {
+    private void verifyFile() throws NonExistingFunctionException, NumberOfVarsInFuncCallException, IllegalBlockInGlobalScope, NonExistingVariableException, InvalidVariableAssignmentEception, VariableAlreadyDeclaredException, InavlidVariableName, InvalidValueException, InvalidVariableDeclarationException, ConstantAssignmentException, GlobalScopeException, CallFunctionFromGlobalException, FinalReturnException, InnerMethodDeclarationException, IllegalReturnFormat, IllegalConditionException, EmptyConditionException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, ConstantNonAssignmentException, UninitializedGlobalVariableException {
 
         String token = tokenizer.getCurrentToken();
         variablesTable.enterScope();
@@ -126,8 +125,8 @@ public class VerificationEngine {
     }
 
 
-    private void verifyFunctionDeclaration() throws Exception,
-            NonExistingFunctionException, InvalidVariableAssignmentEception, NumberOfVarsInFuncCallException {
+    private void verifyFunctionDeclaration() throws
+            NonExistingFunctionException, InvalidVariableAssignmentEception, NumberOfVarsInFuncCallException, VariableAlreadyDeclaredException, InavlidVariableName, InvalidValueException, InvalidVariableDeclarationException, ConstantAssignmentException, FinalReturnException, InnerMethodDeclarationException, IllegalReturnFormat, IllegalConditionException, EmptyConditionException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, ConstantNonAssignmentException, UninitializedGlobalVariableException {
         variablesTable.enterScope();
         boolean returnFlag = false;
         boolean finalFlag = false;
@@ -217,7 +216,7 @@ public class VerificationEngine {
     }
 
 
-    private void varOrFunctionCallCase(String currToken) throws Exception, NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
+    private void varOrFunctionCallCase(String currToken) throws NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception, VariableAlreadyDeclaredException, InavlidVariableName, InvalidValueException, InvalidVariableDeclarationException, ConstantAssignmentException, ConstantNonAssignmentException, UninitializedGlobalVariableException {
         String nextToken;
         //System.out.println("token : " + currToken);
         if (verifyVariableName(tokenizer.getCurrentToken()).equals(currToken)) {
@@ -240,7 +239,7 @@ public class VerificationEngine {
         }
     }
 
-    private void verifyBlock(String blockType) throws Exception, NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
+    private void verifyBlock(String blockType) throws NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception, VariableAlreadyDeclaredException, EmptyConditionException, IllegalConditionException, IllegalVarTypeInConditionException, UninitializedVariableInConditionException, InavlidVariableName, InvalidValueException, InvalidVariableDeclarationException, InnerMethodDeclarationException, ConstantAssignmentException, ConstantNonAssignmentException, UninitializedGlobalVariableException {
         // Advance to (
         tokenizer.advance();
         // Advance to condition
@@ -264,7 +263,11 @@ public class VerificationEngine {
         tokenizer.advance();
     }
 
-    private void verifyInnerPartOfBlock() throws Exception, NonExistingFunctionException, NumberOfVarsInFuncCallException, InvalidVariableAssignmentEception {
+    private void verifyInnerPartOfBlock() throws NonExistingFunctionException, NumberOfVarsInFuncCallException,
+            InvalidVariableAssignmentEception, VariableAlreadyDeclaredException, InavlidVariableName,
+            InvalidValueException, InvalidVariableDeclarationException, ConstantAssignmentException,
+            InnerMethodDeclarationException, IllegalConditionException, EmptyConditionException,
+            IllegalVarTypeInConditionException, UninitializedVariableInConditionException, ConstantNonAssignmentException, UninitializedGlobalVariableException {
         String currToken = tokenizer.getCurrentToken();
 
         while (!currToken.equals(BRACE_CLOSING)) {
@@ -361,7 +364,7 @@ public class VerificationEngine {
         return (tokenizer.getCurrentToken().equals(BRACE_CLOSING));
     }
 
-    private void verifyFunctionCall() throws NumberOfVarsInFuncCallException, Exception {
+    private void verifyFunctionCall() throws NumberOfVarsInFuncCallException, InvalidValueException {
         String functionName = tokenizer.getCurrentToken();
         // Move to (
         tokenizer.advance();
@@ -373,7 +376,7 @@ public class VerificationEngine {
 
     }
 
-    private void verifyFunctionCallVariables(String functionName) throws Exception, NumberOfVarsInFuncCallException {
+    private void verifyFunctionCallVariables(String functionName) throws NumberOfVarsInFuncCallException, InvalidValueException {
 
         int varCounter = 0;
         HashMap<Integer, String> functionVarsInfo =
@@ -387,7 +390,8 @@ public class VerificationEngine {
 
     }
 
-    private int checkVarValidity(HashMap<Integer, String> functionVarsInfo, int varCounter, String functionName) throws NumberOfVarsInFuncCallException, Exception {
+    private int checkVarValidity(HashMap<Integer, String> functionVarsInfo, int varCounter, String functionName) throws
+            NumberOfVarsInFuncCallException, InvalidValueException {
         // Check var validity
         tokenizer.advance();
         if (varCounter == functionVarsInfo.size() && !tokenizer.getCurrentToken().equals(BRACKET_CLOSING)) {
@@ -405,7 +409,7 @@ public class VerificationEngine {
         return varCounter;
     }
 
-    private void verifyTypeFunctionCall(String currentToken, String currIndexType) throws Exception {
+    private void verifyTypeFunctionCall(String currentToken, String currIndexType) throws InvalidValueException {
         switch (currIndexType) {
             case INT ->
                 handleIntValue("function call var", tokenizer.getCurrentToken());
@@ -439,7 +443,8 @@ public class VerificationEngine {
     }
 
 
-    private void verifyVariableDeclaration(String token, boolean isConstant) throws Exception {
+    private void verifyVariableDeclaration(String token, boolean isConstant) throws VariableAlreadyDeclaredException,
+            InavlidVariableName, InvalidValueException, InvalidVariableDeclarationException, ConstantAssignmentException, ConstantNonAssignmentException, UninitializedGlobalVariableException {
         // Whether final or not, now the token is on the type
         switch (token) {
             case INT:
@@ -462,7 +467,7 @@ public class VerificationEngine {
 
     }
 
-    private void verifyVariableAssignment() throws Exception, InvalidVariableAssignmentEception {
+    private void verifyVariableAssignment() throws InvalidVariableAssignmentEception, VariableAlreadyDeclaredException, InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, ConstantAssignmentException, ConstantNonAssignmentException, UninitializedGlobalVariableException {
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
             String variableName = tokenizer.getCurrentToken();
             variablesTable.findVariableScope(variableName); // throws if variable not declared
@@ -497,7 +502,7 @@ public class VerificationEngine {
     }
 
     private void verifyVariable(String type, Pattern valuePattern, boolean isConstant)
-            throws InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, ConstantAssignmentException {
+            throws InavlidVariableName, InvalidVariableDeclarationException, InvalidValueException, ConstantAssignmentException, VariableAlreadyDeclaredException, ConstantNonAssignmentException, UninitializedGlobalVariableException {
 
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
             // Validate and process the variable name
@@ -513,6 +518,8 @@ public class VerificationEngine {
                 if (postAssignmentStatus == END_OF_LINE) {
                     tokenizer.advance();
                     break;
+                } else if (postAssignmentStatus == MORE_VARIABLES) {
+                    System.out.println(tokenizer.getCurrentToken());
                 }
             } else if (valueStatus == END_OF_LINE) {
                 tokenizer.advance();
@@ -524,12 +531,13 @@ public class VerificationEngine {
     }
 
     private int processVariableWithValue(String variableName, String type, Pattern valuePattern, boolean isConstant, boolean isAssignment)
-            throws InvalidValueException, ConstantAssignmentException, InvalidVariableDeclarationException {
+            throws InvalidValueException, ConstantAssignmentException, InvalidVariableDeclarationException, VariableAlreadyDeclaredException, ConstantNonAssignmentException, UninitializedGlobalVariableException {
         tokenizer.advance(); // Move to the value
 
         String variableValue = tokenizer.getCurrentToken();
 
         // Handle references if the value matches a variable pattern
+
         if (variablesTable.isVariableDeclared(variableValue) != 0) {
             variableValue = resolveVariableReference(variableValue);
         } else {
@@ -556,19 +564,23 @@ public class VerificationEngine {
 
     private String  validateVariableValue(String variableName, String type, Pattern valuePattern, String variableValue)
             throws InvalidValueException {
-        return switch (type) {
-            case INT -> handleIntValue(variableName, variableValue);
-            case DOUBLE -> handleDoubleValues(variableName, variableValue);
-            case CHAR -> handleCharValues(variableValue);
-            case STRING -> handleStringValues(variableName);
-            case BOOLEAN -> handleBooleanValues(variableName, variableValue);
-            default -> {
+        switch (type) {
+            case INT:
+                return handleIntValue(variableName, variableValue);
+            case DOUBLE:
+                return handleDoubleValues(variableName, variableValue);
+            case CHAR:
+                return handleCharValues(variableValue);
+            case STRING:
+                return handleStringValues(variableName);
+            case BOOLEAN:
+                return handleBooleanValues(variableName, variableValue);
+            default:
                 if (!valuePattern.matcher(variableValue).matches()) {
                     throw new InvalidValueException(variableName, type);
                 }
-                yield variableValue;
+                return variableValue;
             }
-        };
     }
 
     private String handleStringValues(String variableName) throws InvalidValueException {
@@ -662,38 +674,41 @@ public class VerificationEngine {
     }
 
     private int verifyManyVariableDeclarations(String variableName, String currentToken) throws InvalidVariableDeclarationException {
-        return switch (currentToken) {
-            case EOL_COMMA -> END_OF_LINE;
-            case COMMA -> {
-                tokenizer.advance();
-                yield MORE_VARIABLES;
-            }
-            default -> throw new InvalidVariableDeclarationException(variableName, currentToken);
-        };
+        System.out.println(currentToken);
+        switch (currentToken) {
+            case EOL_COMMA:
+                return END_OF_LINE;
+            case COMMA:
+//                tokenizer.advance();
+                return MORE_VARIABLES;
+            default:
+                throw new InvalidVariableDeclarationException(variableName, currentToken);
+        }
     }
 
-    private int verifyEqualSign(String variableName, String type, boolean isConstant) throws InvalidVariableDeclarationException {
+    private int verifyEqualSign(String variableName, String type, boolean isConstant) throws InvalidVariableDeclarationException, VariableAlreadyDeclaredException, ConstantNonAssignmentException {
         String currentToken = tokenizer.getCurrentToken();
 
         // Handle assignment
-        return switch (currentToken) {
-            case EQUALS -> HAS_VALUE;
+        switch (currentToken) {
+            case EQUALS:
+                return HAS_VALUE;
 
             // Handle end of line or single declaration (int a;)
-            case EOL_COMMA -> {
+            case EOL_COMMA:
                 variablesTable.declareVariable(variableName, type, null, isConstant, false);
-                yield END_OF_LINE;
-            }
+                return END_OF_LINE;
 
             // Handle multiple variable declarations (int a, b;)
-            case COMMA -> {
+            case COMMA:
                 variablesTable.declareVariable(variableName, type, null, isConstant, false);
-                yield MORE_VARIABLES;
-            }
+                return MORE_VARIABLES;
+
 
             // Unexpected token
-            default -> throw new InvalidVariableDeclarationException(variableName, currentToken);
-        };
+            default:
+                throw new InvalidVariableDeclarationException(variableName, currentToken);
+        }
     }
 
 
