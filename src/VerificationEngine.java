@@ -429,6 +429,7 @@ public class VerificationEngine {
     }
 
     private String handleIntValue(String variableName, String variableValue) throws InvalidValueException {
+
         if (validIntPattern.matcher(tokenizer.getCurrentToken()).matches()) {
             tokenizer.lookAhead();
             if (tokenizer.getCurrentToken().equals(DOT)){
@@ -537,12 +538,20 @@ public class VerificationEngine {
         String variableValue = tokenizer.getCurrentToken();
 
         // Handle references if the value matches a variable pattern
-
+        String sign = "";
         if (variablesTable.isVariableDeclared(variableValue) != 0) {
             variableValue = resolveVariableReference(variableValue);
         } else {
+            if (type.equals(INT) || type.equals(DOUBLE) || type.equals(BOOLEAN)) {
+                if (variableValue.equals("+") || variableValue.equals("-")) {
+                    sign = variableValue;
+                    tokenizer.advance();
+                    variableValue = tokenizer.getCurrentToken();
+                }
+            }
             variableValue = validateVariableValue(variableName, type, valuePattern, variableValue);
-
+            sign += variableValue;
+            variableValue = sign;
         }
 
         // Add the variable to the symbol table
