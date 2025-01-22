@@ -624,8 +624,6 @@ public class VerificationEngine {
         tokenizer.advance();
         String variableValue = tokenizer.getCurrentToken();
         if (!variableValue.equals("\"")) {
-            //TODO : do we need it?
-            //verifyString(variableValue);
             result = variableValue;
             tokenizer.advance();
         }
