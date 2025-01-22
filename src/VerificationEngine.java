@@ -101,7 +101,7 @@ public class VerificationEngine {
                 tokenizer.advance();
                 verifyVariableDeclaration(tokenizer.getCurrentToken(), true);
             } else if (TYPES.contains(token)) {
-                tokenizer.advance();
+//                tokenizer.advance();
                 verifyVariableDeclaration(token, false);
             } else if (token.equals(VOID)) {
                 verifyFunctionDeclaration();
@@ -130,7 +130,7 @@ public class VerificationEngine {
 
     private void verifyFunctionDeclaration() throws Exception,
             NonExistingFunctionException, InvalidVariableAssignmentEception, NumberOfVarsInFuncCallException {
-
+        variablesTable.enterScope();
         boolean returnFlag = false;
         boolean finalFlag = false;
         //Now token is void so move to function name
@@ -150,9 +150,9 @@ public class VerificationEngine {
             tokenizer.advance();
             paramName = tokenizer.getCurrentToken();
             //TODO: How to handle final?
-            variablesTable.declareVariable(paramName, paramType, null, finalFlag);
+            variablesTable.declareVariable(paramName, paramType, null, finalFlag, true);
             tokenizer.advance();
-            System.out.println("After var dec: " + tokenizer.getCurrentToken());
+//            System.out.println("After var dec: " + tokenizer.getCurrentToken());
             if (tokenizer.getCurrentToken().equals(",")){
                 tokenizer.advance();
             }
@@ -160,29 +160,38 @@ public class VerificationEngine {
 
         // Advance to {
         tokenizer.advance();
-        //variablesTable.enterScope();
 
         //Now advance and handle what's in the method
         tokenizer.advance();
 
         String currToken = tokenizer.getCurrentToken();
+        System.out.println("func dec : " + currToken);
 
         while (!currToken.equals(BRACE_CLOSING))
         {
 
-            if (TYPES.contains(currToken)) {
+            if (TYPES.contains(currToken)  || currToken.equals(FINAL)) {
                 // Local variable declaration case
-                verifyVariableDeclaration(currToken, false);
+                if (currToken.equals(FINAL)){
+                    tokenizer.advance();
+                    verifyVariableDeclaration(tokenizer.getCurrentToken(), true);
+                } else {
+                    verifyVariableDeclaration(currToken, false);
+                }
             }
 
             if (currToken.equals(IF)) {
                 // If block case
+                variablesTable.enterScope();
                 verifyBlock(IF);
+                variablesTable.exitScope();
             }
 
             if (currToken.equals(WHILE)) {
                 // While block case
+                variablesTable.enterScope();
                 verifyBlock(WHILE);
+                variablesTable.exitScope();
             }
 
             if (currToken.equals(RETURN)) {
@@ -209,7 +218,7 @@ public class VerificationEngine {
             throw new FinalReturnException();
         }
 
-        //variablesTable.exitScope();
+        variablesTable.exitScope();
     }
 
 
@@ -267,14 +276,22 @@ public class VerificationEngine {
         while (!currToken.equals(BRACE_CLOSING)) {
             if (TYPES.contains(currToken) || currToken.equals(FINAL)) {
                 // Local variable declaration case
-                tokenizer.advance();
-                verifyVariableDeclaration(currToken, false);
+                if (currToken.equals(FINAL)){
+                    tokenizer.advance();
+                    verifyVariableDeclaration(tokenizer.getCurrentToken(), true);
+                } else {
+                    verifyVariableDeclaration(currToken, false);
+                }
             } else if (currToken.equals(IF)) {
                 // If block case
+                variablesTable.enterScope();
                 verifyBlock(IF);
+                variablesTable.exitScope();
             } else if (currToken.equals(WHILE)) {
                 // While block case
+                variablesTable.enterScope();
                 verifyBlock(WHILE);
+                variablesTable.exitScope();
             } else if (currToken.equals(VOID)) {
                 // Method declaration inside another method error
                 // Raise inner method declaration error
@@ -295,10 +312,10 @@ public class VerificationEngine {
         if (currentToken.equals("|") || currentToken.equals("&")){
             throw new IllegalConditionException(blockType);
         }
-        System.out.println("Im her - " + tokenizer.getCurrentToken());
+//        System.out.println("Im her - " + tokenizer.getCurrentToken());
         verifyBlockConditionCases(blockType);
         while (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING)){
-            System.out.println("Im her - " + tokenizer.getCurrentToken());
+//            System.out.println("Im her - " + tokenizer.getCurrentToken());
             verifyBlockConditionCases(blockType);
         }
     }
@@ -307,7 +324,7 @@ public class VerificationEngine {
             UninitializedVariableInConditionException, IllegalConditionException {
         String token = tokenizer.getCurrentToken();
 
-        System.out.println("in with " + token);
+//        System.out.println("in with " + token);
 
         //System.out.println("token: " + token);
         if (token.equals("|") ||
@@ -430,7 +447,7 @@ public class VerificationEngine {
 
     private String handleIntValue(String variableName) throws InvalidValueException {
         String result = tokenizer.getCurrentToken();
-        System.out.println("here " + tokenizer.getCurrentToken());
+//        System.out.println("here " + tokenizer.getCurrentToken());
         if (validIntPattern.matcher(tokenizer.getCurrentToken()).matches()) {
             tokenizer.lookAhead();
             if (tokenizer.getCurrentToken().equals(DOT)){
@@ -448,6 +465,9 @@ public class VerificationEngine {
 
     private void verifyVariableDeclaration(String token, boolean isConstant) throws Exception {
         // Whether final or not, now the token is on the type
+//        if (isConstant) {
+//            tokenizer.advance();
+//        }
         switch (token) {
             case INT:
                 verifyVariable(INT, validIntPattern, isConstant);
@@ -512,14 +532,17 @@ public class VerificationEngine {
 
     private void verifyVariable(String type, Pattern valuePattern, boolean isConstant)
             throws Exception {
-        if (isConstant) {
-            tokenizer.advance(); // Move to the variable name
-        }
+//        if (isConstant) {
+//            tokenizer.advance(); // Move to the variable name
+//        }
 
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
             // Validate and process the variable name
+            tokenizer.advance();
+            System.out.println(tokenizer.getCurrentToken());
             String variableName = verifyVariableName(tokenizer.getCurrentToken());
             tokenizer.advance(); // Move to "="
+            System.out.println(tokenizer.getCurrentToken());
             int valueStatus = verifyEqualSign(variableName, type, isConstant);
             if (valueStatus == HAS_VALUE) {
                 boolean isAssignment = false;
@@ -555,11 +578,11 @@ public class VerificationEngine {
             variablesTable.assignValue(variableName, variableValue);
         }
         else {
-            variablesTable.declareVariable(variableName, type, variableValue, isConstant);
+            variablesTable.declareVariable(variableName, type, variableValue, isConstant, false);
         }
 //        System.out.println(variableValue);
 //        System.out.println(tokenizer.getCurrentToken());
-        System.out.println("after double check " + tokenizer.getCurrentToken());
+//        System.out.println("after double check " + tokenizer.getCurrentToken());
         tokenizer.advance(); // Move past the value
 //        System.out.println(tokenizer.getCurrentToken());
         // Verify if there are more declarations or end of line
@@ -659,7 +682,7 @@ public class VerificationEngine {
                 } else if (AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
                     tokenizer.retreat();
 //                    tokenizer.advance();
-                    System.out.println(tokenizer.getCurrentToken());
+//                    System.out.println(tokenizer.getCurrentToken());
                 } else {
                     throw new InvalidValueException(variableName,tmp, DOUBLE);
                 }
@@ -695,7 +718,7 @@ public class VerificationEngine {
     }
 
     private int verifyManyVariableDeclarations(String variableName, String currentToken) throws InvalidVariableDeclarationException {
-        System.out.println(currentToken);
+//        System.out.println(currentToken);
         switch (currentToken) {
             case EOL_COMMA:
                 return END_OF_LINE;
@@ -717,12 +740,12 @@ public class VerificationEngine {
 
             // Handle end of line or single declaration (int a;)
             case EOL_COMMA:
-                variablesTable.declareVariable(variableName, type, null, isConstant);
+                variablesTable.declareVariable(variableName, type, null, isConstant, false);
                 return END_OF_LINE;
 
             // Handle multiple variable declarations (int a, b;)
             case COMMA:
-                variablesTable.declareVariable(variableName, type, null, isConstant);
+                variablesTable.declareVariable(variableName, type, null, isConstant, false);
                 return MORE_VARIABLES;
 
             // Unexpected token
@@ -737,6 +760,7 @@ public class VerificationEngine {
         if (VALID_VARIABLE_REGEX.matches(currentToken)) {
             throw new InavlidVariableName(currentToken);
         } else {
+            System.out.println("verify: " + tokenizer.getCurrentToken());
             return currentToken;
         }
     }

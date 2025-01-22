@@ -38,25 +38,29 @@ public class SymbolTable {
 
 
     public void exitScope() {
+        printSymbolTable();
         variablesMap.remove(currentScope);
         currentScope--;
         HashMap<String, Triple> globalVariables = variablesMap.get(0);
-        for (Map.Entry<String, Triple> entry : globalVariables.entrySet()) {
-            if (entry.getValue().lastUpdatedScope == getCurrentScope()) {
-                entry.getValue().globalVariableValuesStack.pop();
-                entry.getValue().lastUpdatedScope--;
-                entry.getValue().value = entry.getValue().globalVariableValuesStack.peek();
+        if (globalVariables != null) {
+            for (Map.Entry<String, Triple> entry : globalVariables.entrySet()) {
+                if (entry.getValue().lastUpdatedScope == getCurrentScope()) {
+                    entry.getValue().globalVariableValuesStack.pop();
+                    entry.getValue().lastUpdatedScope--;
+                    entry.getValue().value = entry.getValue().globalVariableValuesStack.peek();
+                }
             }
         }
+
     }
 
-    public void declareVariable(String name, String type, Object value, boolean isConstant) {
+    public void declareVariable(String name, String type, Object value, boolean isConstant, boolean isParameter) {
         HashMap<String, Triple> currentScopeMap = variablesMap.get(currentScope);
 
         if (currentScopeMap.containsKey(name)) {
             throw new IllegalArgumentException("Variable '" + name + "' already declared in the current scope");
         }
-        if (isConstant && value == null) {
+        if (isConstant && value == null && !isParameter) {
             throw new IllegalArgumentException("Constant variable cannot be null");
         }
 
@@ -137,7 +141,7 @@ public class SymbolTable {
         try {
             // Test 1: Declare a constant variable
             st.enterScope();
-            st.declareVariable("x", "int", 1, true);
+            st.declareVariable("x", "int", 1, true, true);
             System.out.println("Declared constant x in scope 1");
 
             // Test 2: Attempt reassignment to a constant variable
@@ -149,14 +153,14 @@ public class SymbolTable {
 
             // Test 3: Declare and assign in nested scope
             st.enterScope();
-            st.declareVariable("y", "String", "hello", false);
+            st.declareVariable("y", "String", "hello", false, true);
             System.out.println("Declared y in scope 2");
             st.assignValue("y", "world");
             System.out.println("Assigned new value to y in scope 2: " + st.getValue("y"));
 
             // Test 4: Shadowing variable in a nested scope
             int y = 5;
-            st.declareVariable("x", "int", y, false);
+            st.declareVariable("x", "int", y, false, true);
             System.out.println("Declared x in scope 2 (shadowed)");
 //            st.assignValue("x", 20);
             System.out.println("Assigned new value to x in scope 2: " + st.getValue("x"));
