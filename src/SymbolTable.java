@@ -40,20 +40,19 @@ public class SymbolTable {
 
     public void exitScope() {
         printSymbolTable();
-        variablesMap.remove(currentScope);
-        currentScope--;
         HashMap<String, Triple> globalVariables = variablesMap.get(1);
         if (globalVariables != null) {
             for (Map.Entry<String, Triple> entry : globalVariables.entrySet()) {
-//                System.out.println(entry.getValue().globalVariableValuesStack);
                 if (entry.getValue().lastUpdatedScope == getCurrentScope()) {
-//                    entry.getValue().globalVariableValuesStack.pop();
+                    entry.getValue().globalVariableValuesStack.pop();
                     entry.getValue().lastUpdatedScope--;
-//                    System.out.println(entry.getValue().globalVariableValuesStack);
+                    System.out.println(entry.getValue().globalVariableValuesStack);
                     entry.getValue().value = entry.getValue().globalVariableValuesStack.peek();
                 }
             }
         }
+        variablesMap.remove(currentScope);
+        currentScope--;
 
     }
 
@@ -72,6 +71,7 @@ public class SymbolTable {
         if (getCurrentScope() == 1) {
             variablesMap.get(1).get(name).globalVariableValuesStack.push(value);
             variablesMap.get(1).get(name).lastUpdatedScope++;
+            System.out.println(variablesMap.get(1).get(name).globalVariableValuesStack);
         }
     }
 
@@ -85,10 +85,11 @@ public class SymbolTable {
         }
         Triple Triple = variablesMap.get(scope).get(name);
         Triple.value = value;
-        if (getCurrentScope() == 1) {
+        if (scope == 1) {
+            variablesMap.get(scope).get(name).globalVariableValuesStack.push(value);
+            variablesMap.get(scope).get(name).lastUpdatedScope++;
+            System.out.println(variablesMap.get(scope).get(name).globalVariableValuesStack);
 
-            variablesMap.get(1).get(name).globalVariableValuesStack.push(value);
-            variablesMap.get(1).get(name).lastUpdatedScope++;
 
         }
     }
