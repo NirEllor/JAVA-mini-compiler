@@ -21,10 +21,7 @@ public class JavaVerifier {
         FunctionsTable functionsTable = new FunctionsTable();
         PreProcessor preProcessor = new PreProcessor(filePath, functionsTable);
         String output = preProcessor.run();
-        if (Objects.equals(output, "")){
-            System.out.print("preprocessor failed");
-        }
-        else {
+        if (!Objects.equals(output, "")){
             VerificationEngine engine = new VerificationEngine(output, functionsTable);
         }
 //        System.out.println(output);

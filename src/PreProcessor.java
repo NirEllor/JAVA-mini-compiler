@@ -1,5 +1,4 @@
 import java.io.*;
-import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.regex.*;
 
@@ -13,7 +12,6 @@ public class PreProcessor {
     String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
     String COMMENT_REGEX = "^(\\s*//.*|\\s*)$";
     String VALID_FUNCTION_REGEX = "^void ([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)";
-    String VALID_FUNCTION_CALL_REGEX = "([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)";
     String END_OF_LINE_REGEX = ".*[{};]$";
 
     private static final Set<String> TYPES = new HashSet<>(Arrays.asList(
@@ -46,7 +44,6 @@ public class PreProcessor {
             }
         }
 
-        System.out.println("File cleaned successfully. Output written to " + cleanedFilePath);
     }
 
     // Processes the cleaned file to collect function names and validate parentheses
@@ -72,9 +69,6 @@ public class PreProcessor {
                     }
                     while (functionMatcher.find()) {
                         String functionName = functionMatcher.group(1);
-//                        if (isReservedKeyword(functionName)) {
-//                            throw new FunctionDeclarationException(line);
-//                        }
                         String params = functionMatcher.group(2);
                         ArrayList<String> paramTypes = parseParameterTypes(params, line);
                         functionsTable.addFunction(functionName, paramTypes);  // Use FunctionsTable instance
@@ -109,9 +103,6 @@ public class PreProcessor {
         }
     }
 
-    private boolean isReservedKeyword(String functionName) {
-        return functionName.equals("if") || functionName.equals("while");
-    }
 
     // Parses a parameter list and returns an ArrayList of parameter types
     private ArrayList<String> parseParameterTypes(String params, String line) throws InvalidFunctionParameterException {
@@ -127,10 +118,11 @@ public class PreProcessor {
                 paramTypes.add(parts[0]);  // Add the type (first part) to the list
             } else if (parts.length == 3 && validVariablePattern.matcher(parts[2]).matches() &&
                     TYPES.contains(parts[1]) && parts[0].equals(FINAL)){
-                    //TODO: how to handle final?
+                paramTypes.add(parts[1]);
             } else {
                 throw new InvalidFunctionParameterException(line);
             }
+
         }
         return paramTypes;
     }
@@ -159,7 +151,7 @@ public class PreProcessor {
         FunctionsTable functionsTable = new FunctionsTable();  // Create an instance of FunctionsTable
         PreProcessor preProcessor = new PreProcessor(inputFile, functionsTable);
 
-        String output = preProcessor.run();
+        preProcessor.run();
 //        System.out.println(output);
 
         // Print functions table content

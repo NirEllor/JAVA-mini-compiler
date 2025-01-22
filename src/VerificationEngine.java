@@ -161,7 +161,7 @@ public class VerificationEngine {
         tokenizer.advance();
 
         String currToken = tokenizer.getCurrentToken();
-        System.out.println("func dec : " + currToken);
+//        System.out.println("func dec : " + currToken);
 
         while (!currToken.equals(BRACE_CLOSING))
         {
@@ -408,7 +408,7 @@ public class VerificationEngine {
     private void verifyTypeFunctionCall(String currentToken, String currIndexType) throws Exception {
         switch (currIndexType) {
             case INT ->
-                handleIntValue("function call var");
+                handleIntValue("function call var", tokenizer.getCurrentToken());
 
             case DOUBLE->
                 handleDoubleValues("function call var", currentToken);
@@ -424,8 +424,7 @@ public class VerificationEngine {
         }
     }
 
-    private String handleIntValue(String variableName) throws InvalidValueException {
-        String result = tokenizer.getCurrentToken();
+    private String handleIntValue(String variableName, String variableValue) throws InvalidValueException {
         if (validIntPattern.matcher(tokenizer.getCurrentToken()).matches()) {
             tokenizer.lookAhead();
             if (tokenizer.getCurrentToken().equals(DOT)){
@@ -436,7 +435,7 @@ public class VerificationEngine {
         } else {
             throw new InvalidValueException(variableName, INT);
         }
-        return result;
+        return variableValue;
     }
 
 
@@ -503,10 +502,10 @@ public class VerificationEngine {
         while (!tokenizer.getCurrentToken().equals(EOL_COMMA)) {
             // Validate and process the variable name
             tokenizer.advance();
-            System.out.println(tokenizer.getCurrentToken());
+//            System.out.println(tokenizer.getCurrentToken());
             String variableName = verifyVariableName(tokenizer.getCurrentToken());
             tokenizer.advance(); // Move to "="
-            System.out.println(tokenizer.getCurrentToken());
+//            System.out.println(tokenizer.getCurrentToken());
             int valueStatus = verifyEqualSign(variableName, type, isConstant);
             if (valueStatus == HAS_VALUE) {
                 boolean isAssignment = false;
@@ -533,9 +532,10 @@ public class VerificationEngine {
         // Handle references if the value matches a variable pattern
         if (variablesTable.isVariableDeclared(variableValue) != 0) {
             variableValue = resolveVariableReference(variableValue);
-        }
+        } else {
+            variableValue = validateVariableValue(variableName, type, valuePattern, variableValue);
 
-        variableValue = validateVariableValue(variableName, type, valuePattern, variableValue);
+        }
 
         // Add the variable to the symbol table
         if (isAssignment) {
@@ -557,7 +557,7 @@ public class VerificationEngine {
     private String  validateVariableValue(String variableName, String type, Pattern valuePattern, String variableValue)
             throws InvalidValueException {
         return switch (type) {
-            case INT -> handleIntValue(variableName);
+            case INT -> handleIntValue(variableName, variableValue);
             case DOUBLE -> handleDoubleValues(variableName, variableValue);
             case CHAR -> handleCharValues(variableValue);
             case STRING -> handleStringValues(variableName);
@@ -702,7 +702,7 @@ public class VerificationEngine {
         if (VALID_VARIABLE_REGEX.matches(currentToken)) {
             throw new InavlidVariableName(currentToken);
         } else {
-            System.out.println("verify: " + tokenizer.getCurrentToken());
+//            System.out.println("verify: " + tokenizer.getCurrentToken());
             return currentToken;
         }
     }

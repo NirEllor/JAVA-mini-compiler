@@ -6,17 +6,17 @@ public class SymbolTable {
     private int currentScope = 0;
 
     static class Triple {
-        private final Stack<Object> globalVariableValuesStack;
+        private final Stack<String> globalVariableValuesStack;
         private int lastUpdatedScope;
         String type;
-        Object value;
+        String value;
         boolean isConstant;
 
-        Triple(String type, Object value, boolean isConstant) {
+        Triple(String type, String value, boolean isConstant) {
             this.type = type;
             this.value = value;
             this.isConstant = isConstant;
-            this.globalVariableValuesStack = new Stack<Object>();
+            this.globalVariableValuesStack = new Stack<>();
             this.lastUpdatedScope = 0;
         }
 
@@ -54,7 +54,7 @@ public class SymbolTable {
 
     }
 
-    public void declareVariable(String name, String type, Object value, boolean isConstant, boolean isParameter) {
+    public void declareVariable(String name, String type, String value, boolean isConstant, boolean isParameter) {
         HashMap<String, Triple> currentScopeMap = variablesMap.get(currentScope);
 
         if (currentScopeMap.containsKey(name)) {
@@ -71,7 +71,7 @@ public class SymbolTable {
         }
     }
 
-    public void assignValue(String name, Object value) throws ConstantAssignmentException {
+    public void assignValue(String name, String value) throws ConstantAssignmentException {
         int scope = findVariableScope(name); // might throw if not assigned
         if (variablesMap.get(scope).get(name).isConstant) {
             throw new ConstantAssignmentException(name);
@@ -88,11 +88,7 @@ public class SymbolTable {
 
     public String getValue(String name) {
         int scope = findVariableScope(name);
-        Object res = variablesMap.get(scope).get(name).value;
-        if (res == null) {
-            return null;
-        }
-        return (String) variablesMap.get(scope).get(name).value;
+        return variablesMap.get(scope).get(name).value;
     }
 
     public String getType(String name) {
@@ -141,12 +137,12 @@ public class SymbolTable {
         try {
             // Test 1: Declare a constant variable
             st.enterScope();
-            st.declareVariable("x", "int", 1, true, true);
+            st.declareVariable("x", "int", "1", true, true);
             System.out.println("Declared constant x in scope 1");
 
             // Test 2: Attempt reassignment to a constant variable
             try {
-                st.assignValue("x", 2); // Expected to throw
+                st.assignValue("x", "2"); // Expected to throw
             } catch (ConstantAssignmentException e) {
                 System.err.println(e.getMessage()); // Ignored for testing purposes
             }
@@ -159,8 +155,7 @@ public class SymbolTable {
             System.out.println("Assigned new value to y in scope 2: " + st.getValue("y"));
 
             // Test 4: Shadowing variable in a nested scope
-            int y = 5;
-            st.declareVariable("x", "int", y, false, true);
+            st.declareVariable("x", "int", "y", false, true);
             System.out.println("Declared x in scope 2 (shadowed)");
 //            st.assignValue("x", 20);
             System.out.println("Assigned new value to x in scope 2: " + st.getValue("x"));

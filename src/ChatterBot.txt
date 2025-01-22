@@ -1,78 +1,23 @@
-//int j = 1;
-//j = 2;
+// some int member
+final int a = 5;
 
-//int a = 1, b = 2;
-//a = 2;
+//Another int member
+final int b = a;
 
-//int a = 1, b = 2;
-//b = 1;
+// now - a string member
+String s;
 
-//int a = 1, b = 2;
-//a = 2, b = 1;
-
-//int a = 1, b;
-
-//int a = 1, b;
-//b = 1;
-
-//int a, b = 1;
-//a = 1;
-
-//int a = 1, b= 2, c = 3, d;
-//a = 2;
-
-//int a, b;
-//a = 1, b= 300;
-
-
-//int a, b, c, d, e = 10, f=11, g=0;
-//a = 1, b = 2, c= 4, d = 3;
-
-
-//final int mi;
-//final int were = 3;
-//were = 5;
-
-
-//a = 3;
-
-//String s = "s";
-//s = "ab";
-
-//final int a = 5;
-//final int b = a;
-//int a =
-//int a = 5
-// Problematic - return a nullPointerException instead of Compilation
-
-// String a = "yuli";
-
-
-//char c = '4';
-//c = 'd';
-
-//int a = 5;
-//int b = a + 5;
-
-//}double Pi = 3.1;
-
-//String s = "";
-
-//double a = 0;
-//double d = 0.;
-//double d = 0.5;
-//double e = .0;
-//double a = 0.0;
-//double f = .;
-//int a = true;
-//double a = "ag;
-//char a = 's';
-
-void foo(int a) {
-     goo(2);
-     return;
+void boo(int a, int b, String s) {
+	if (true) {
+		boo(1,2,"hello");
+		while (false) {
+			soo(true);
+		}
+	}
+	return;
 }
 
-void goo(int a){
-    return;
+void soo(boolean b) {
+	return;
 }
+
