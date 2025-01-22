@@ -36,7 +36,6 @@ public class VerificationEngine {
     public static final String WHILE = "while";
     public static final String RETURN = "return";
     public static final String BRACKET_OPENING = "(";
-    public static final String KEYWORD = "KEYWORD";
     private static final String IDENTIFIER = "IDENTIFIER";
 
     private static final String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
@@ -304,10 +303,9 @@ public class VerificationEngine {
         if (currentToken.equals("|") || currentToken.equals("&")){
             throw new IllegalConditionException(blockType);
         }
-        verifyBlockConditionCases(blockType);
-        while (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING)){
+        do {
             verifyBlockConditionCases(blockType);
-        }
+        } while (!tokenizer.getCurrentToken().equals(BRACKET_CLOSING));
     }
 
     private void verifyBlockConditionCases(String blockType) throws IllegalVarTypeInConditionException,
@@ -400,32 +398,30 @@ public class VerificationEngine {
         }
 
         String currIndexType = functionVarsInfo.get(varCounter);
-        String currValue = tokenizer.getCurrentToken();
-        currValue = verifyTypeFunctionCall(tokenizer.getCurrentToken(), currIndexType);
+//        String currValue = tokenizer.getCurrentToken();
+        verifyTypeFunctionCall(tokenizer.getCurrentToken(), currIndexType);
         varCounter++;
         tokenizer.advance();
         return varCounter;
     }
 
-    private String verifyTypeFunctionCall(String currentToken, String currIndexType) throws Exception {
+    private void verifyTypeFunctionCall(String currentToken, String currIndexType) throws Exception {
         switch (currIndexType) {
-            case INT -> {
-                return handleIntValue("function call var");
-            }
-            case DOUBLE-> {
-                return handleDoubleValues("function call var", currentToken);
-            }
-            case STRING -> {
-                return handleStringValues("function call var");
-            }
-            case BOOLEAN -> {
+            case INT ->
+                handleIntValue("function call var");
+
+            case DOUBLE->
+                handleDoubleValues("function call var", currentToken);
+
+            case STRING ->
+                handleStringValues("function call var");
+
+            case BOOLEAN ->
                 handleBooleanValues("function call var", currentToken);
-            }
-            case CHAR -> {
-                return handleCharValues("function call var");
-            }
+
+            case CHAR ->
+                handleCharValues("function call var");
         }
-        return null;
     }
 
     private String handleIntValue(String variableName) throws InvalidValueException {
@@ -492,18 +488,13 @@ public class VerificationEngine {
     }
 
     private Pattern getPattern(String type) {
-        switch (type) {
-            case INT:
-                return validIntPattern;
-            case CHAR:
-                return validCharPattern;
-            case DOUBLE:
-                return validDoublePattern;
-            case STRING:
-                return validStringPattern;
-            default:
-                return null;
-        }
+        return switch (type) {
+            case INT -> validIntPattern;
+            case CHAR -> validCharPattern;
+            case DOUBLE -> validDoublePattern;
+            case STRING -> validStringPattern;
+            default -> null;
+        };
     }
 
     private void verifyVariable(String type, Pattern valuePattern, boolean isConstant)
@@ -565,23 +556,19 @@ public class VerificationEngine {
 
     private String  validateVariableValue(String variableName, String type, Pattern valuePattern, String variableValue)
             throws InvalidValueException {
-        switch (type) {
-            case INT:
-                return handleIntValue(variableName);
-            case DOUBLE:
-                return handleDoubleValues(variableName, variableValue);
-            case CHAR:
-                return handleCharValues(variableValue);
-            case STRING:
-                return handleStringValues(variableName);
-            case BOOLEAN:
-                return handleBooleanValues(variableName, variableValue);
-            default:
+        return switch (type) {
+            case INT -> handleIntValue(variableName);
+            case DOUBLE -> handleDoubleValues(variableName, variableValue);
+            case CHAR -> handleCharValues(variableValue);
+            case STRING -> handleStringValues(variableName);
+            case BOOLEAN -> handleBooleanValues(variableName, variableValue);
+            default -> {
                 if (!valuePattern.matcher(variableValue).matches()) {
                     throw new InvalidValueException(variableName, type);
                 }
-                return variableValue;
-        }
+                yield variableValue;
+            }
+        };
     }
 
     private String handleStringValues(String variableName) throws InvalidValueException {
@@ -656,7 +643,6 @@ public class VerificationEngine {
                 result += tmp;
             } else {
                 tokenizer.retreat();
-                tmp = tokenizer.getCurrentToken();
                 throw new InvalidValueException(variableName, DOUBLE);
             }
         } else {
@@ -676,39 +662,38 @@ public class VerificationEngine {
     }
 
     private int verifyManyVariableDeclarations(String variableName, String currentToken) throws InvalidVariableDeclarationException {
-        switch (currentToken) {
-            case EOL_COMMA:
-                return END_OF_LINE;
-            case COMMA:
+        return switch (currentToken) {
+            case EOL_COMMA -> END_OF_LINE;
+            case COMMA -> {
                 tokenizer.advance();
-                return MORE_VARIABLES;
-            default:
-                throw new InvalidVariableDeclarationException(variableName, currentToken);
-        }
+                yield MORE_VARIABLES;
+            }
+            default -> throw new InvalidVariableDeclarationException(variableName, currentToken);
+        };
     }
 
     private int verifyEqualSign(String variableName, String type, boolean isConstant) throws InvalidVariableDeclarationException {
         String currentToken = tokenizer.getCurrentToken();
 
         // Handle assignment
-        switch (currentToken) {
-            case EQUALS:
-                return HAS_VALUE;
+        return switch (currentToken) {
+            case EQUALS -> HAS_VALUE;
 
             // Handle end of line or single declaration (int a;)
-            case EOL_COMMA:
+            case EOL_COMMA -> {
                 variablesTable.declareVariable(variableName, type, null, isConstant, false);
-                return END_OF_LINE;
+                yield END_OF_LINE;
+            }
 
             // Handle multiple variable declarations (int a, b;)
-            case COMMA:
+            case COMMA -> {
                 variablesTable.declareVariable(variableName, type, null, isConstant, false);
-                return MORE_VARIABLES;
+                yield MORE_VARIABLES;
+            }
 
             // Unexpected token
-            default:
-                throw new InvalidVariableDeclarationException(variableName, currentToken);
-        }
+            default -> throw new InvalidVariableDeclarationException(variableName, currentToken);
+        };
     }
 
 

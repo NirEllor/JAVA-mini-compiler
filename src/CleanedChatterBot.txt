@@ -1,1 +1,7 @@
-String s = "";
+void foo(int a) {
+     goo(2);
+     return;
+}
+void goo(int a){
+    return;
+}
