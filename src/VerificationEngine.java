@@ -415,7 +415,7 @@ public class VerificationEngine {
                 handleIntValue("function call var", tokenizer.getCurrentToken());
 
             case DOUBLE->
-                handleDoubleValues("function call var", currentToken);
+                handleDoubleValues("function call var", currentToken, DOUBLE);
 
             case STRING ->
                 handleStringValues("function call var");
@@ -568,7 +568,7 @@ public class VerificationEngine {
             case INT:
                 return handleIntValue(variableName, variableValue);
             case DOUBLE:
-                return handleDoubleValues(variableName, variableValue);
+                return handleDoubleValues(variableName, variableValue, DOUBLE);
             case CHAR:
                 return handleCharValues(variableValue);
             case STRING:
@@ -626,7 +626,7 @@ public class VerificationEngine {
         return result;
     }
 
-    private String handleDoubleValues(String variableName, String variableValue) throws InvalidValueException {
+    private String handleDoubleValues(String variableName, String variableValue, String type) throws InvalidValueException {
         String tmp = variableValue;
         String result = tmp;
         if (validIntPattern.matcher(tmp).matches()) {
@@ -641,10 +641,10 @@ public class VerificationEngine {
                 } else if (AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
                     tokenizer.retreat();
                 } else {
-                    throw new InvalidValueException(variableName, DOUBLE);
+                    throw new InvalidValueException(variableName, type);
                 }
             } else if (!AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
-                throw new InvalidValueException(variableName, DOUBLE);
+                throw new InvalidValueException(variableName, type);
             } else {
                 tokenizer.retreat();
             }
@@ -655,10 +655,10 @@ public class VerificationEngine {
                 result += tmp;
             } else {
                 tokenizer.retreat();
-                throw new InvalidValueException(variableName, DOUBLE);
+                throw new InvalidValueException(variableName, type);
             }
         } else {
-            throw new InvalidValueException(variableName, DOUBLE);
+            throw new InvalidValueException(variableName, type);
         }
         return result;
     }
@@ -667,7 +667,7 @@ public class VerificationEngine {
     private String handleBooleanValues(String variableName, String variableValue) throws InvalidValueException {
         // Booleans are either TRUE, FALSE, or valid numeric values (int or double)
         if (!variableValue.equals(TRUE) && !variableValue.equals(FALSE)) {
-            variableValue = handleDoubleValues(variableName, variableValue);
+            variableValue = handleDoubleValues(variableName, variableValue, BOOLEAN);
         }
         return variableValue;
 
