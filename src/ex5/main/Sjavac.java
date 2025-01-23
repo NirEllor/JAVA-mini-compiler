@@ -14,13 +14,13 @@ import java.util.Objects;
  */
 public class Sjavac {
 
-    public static final String EXTENTION = ".sjava";
+    public static final String EXTENSION = ".sjava";
     public static final String IO_ERROR = "2";
     public static final String IOEXCEPTION_WRONG_FILE_FORMAT_NOT_SJAVA = "IOException: Wrong file format (not sjava).";
     public static final String IOEXCEPTION_ILLEGAL_NUMBER_OF_ARGUMENTS_FOR_THE_PROGRAM = "IOException: Illegal Number of arguments for the program";
-    public static final int LEGGAL_LENGTH = 1;
+    public static final int LEGAL_LENGTH = 1;
     public static final int PATH_INDEX = 0;
-    public static final String ENPTY_STR = "";
+    public static final String EMPTY_STR = "";
 
     /**
      * The main function of the program. Preprocess the file, and verifies it using PreProcessor
@@ -30,7 +30,7 @@ public class Sjavac {
     public static void main(String[] args) throws IOException {
 
         //open the file
-        if (args.length < LEGGAL_LENGTH) {
+        if (args.length < LEGAL_LENGTH) {
             System.out.println(IO_ERROR);
             throw new IOException(IOEXCEPTION_ILLEGAL_NUMBER_OF_ARGUMENTS_FOR_THE_PROGRAM);
         }
@@ -41,7 +41,7 @@ public class Sjavac {
         String fileName = path.getFileName().toString();
 
 //         Check if the file has the .sjava extension
-        if (!fileName.endsWith(EXTENTION)) {
+        if (!fileName.endsWith(EXTENSION)) {
             System.out.println(IO_ERROR);
             throw new IOException(IOEXCEPTION_WRONG_FILE_FORMAT_NOT_SJAVA);
         }
@@ -52,7 +52,7 @@ public class Sjavac {
 
         String output = preProcessor.run();
 
-        if (!Objects.equals(output, ENPTY_STR)){
+        if (!Objects.equals(output, EMPTY_STR)){
             new VerificationEngine(output, functionsTable);
         }
     }

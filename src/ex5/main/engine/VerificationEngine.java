@@ -24,7 +24,7 @@ public class VerificationEngine {
     private static final String EQUALS = "=";
     private static final String EOL_COMMA = ";";
     private static final String COMMA = ",";
-    private static final String FALSE = "false";;
+    private static final String FALSE = "false";
     private static final String DOT = ".";
     private static final String BRACKET_CLOSING = ")";
     private static final String INT = "int";
@@ -60,14 +60,13 @@ public class VerificationEngine {
     private SymbolTable variablesTable;
     private Tokenizer tokenizer;
 
-    // Regexs
-    private static final String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
+    // Regex
     private static final String VALID_INT_REGEX = "^[+-]?\\d+$";
     private static final String VALID_CHAR_REGEX = "^[^']$";
     private static final String VALID_DOUBLE_REGEX = "^[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?$";
     private static final String VALID_STRING_REGEX = "^.*$";
 
-    // Ratterns
+    // Patterns
     public Pattern validIntPattern = Pattern.compile(VALID_INT_REGEX);
     public Pattern validCharPattern = Pattern.compile(VALID_CHAR_REGEX);
     public Pattern validDoublePattern = Pattern.compile(VALID_DOUBLE_REGEX);
@@ -182,7 +181,7 @@ public class VerificationEngine {
                 }
             } else if (token.equals(WHILE) || token.equals(IF)) {
                 throw new IllegalBlockInGlobalScope(token);
-            } else if (tokenizer.isIdentifier()) {
+            } else if (tokenizer.isIdentifier(token)) {
                 throw new NonExistingVariableException(token);
             } else if (token.equals(BRACE_CLOSING)) {
                 tokenizer.advance();
@@ -496,8 +495,7 @@ public class VerificationEngine {
             tokenizer.advance();
         } else if (variablesTable.isVariableDeclared(token) > VARIABLE_NOT_DECLARED) {
                 verifyCaseUninitializedVariableInBlockCondition(token, blockType);
-        } else if ((!validDoublePattern.matcher(token).matches()) &&
-                (!validIntPattern.matcher(token).matches())) {
+        } else if (handleDoubleValues(token).equals("InvalidValueTypeException")) {
             // Case 3 : A double or int constant/value (e.g. 5, -3, -21.5).
             throw new IllegalConditionException(blockType);
         } else {
@@ -543,7 +541,7 @@ public class VerificationEngine {
 
     /**
      * Verifies return format and checks if it is the last one
-     * @return - True if it is the last, just before }, anf False otherwise
+     * @return - True if it is the last, just before '}', anf False otherwise
      * @throws IllegalReturnFormat - When the return on the method is in illegal format
 
      */
@@ -627,9 +625,7 @@ public class VerificationEngine {
         verifyTypeFunctionCall(tokenizer.getCurrentToken(), currIndexType);
 
         varCounter++;
-
         tokenizer.advance();
-
         return varCounter;
     }
 
@@ -640,22 +636,33 @@ public class VerificationEngine {
      * @throws InvalidValueTypeException - When the value of variable is illegal, during assignment
      */
     private void verifyTypeFunctionCall(String currentToken, String currIndexType) throws InvalidValueTypeException {
-
         switch (currIndexType) {
-            case INT ->
+            case INT:{
                 handleIntValue(FUNCTION_CALL_VAR, tokenizer.getCurrentToken());
+                break;
+            }
 
-            case DOUBLE->
-                handleDoubleValues(FUNCTION_CALL_VAR, currentToken, DOUBLE);
+            case DOUBLE:{
+                if (handleDoubleValues(currentToken).equals("InvalidValueTypeException")){
+                    throw new InvalidValueTypeException(FUNCTION_CALL_VAR, DOUBLE);
+                }
+                break;
+            }
 
-            case STRING ->
+            case STRING: {
                 handleStringValues(FUNCTION_CALL_VAR);
+                break;
+            }
 
-            case BOOLEAN ->
+            case BOOLEAN: {
                 handleBooleanValues(FUNCTION_CALL_VAR, currentToken);
+                break;
+            }
 
-            case CHAR ->
+            case CHAR: {
                 handleCharValues(FUNCTION_CALL_VAR);
+                break;
+            }
         }
     }
 
@@ -808,7 +815,10 @@ public class VerificationEngine {
             case INT:
                 return handleIntValue(variableName, variableValue);
             case DOUBLE:
-                return handleDoubleValues(variableName, variableValue, DOUBLE);
+                String result =  handleDoubleValues(variableValue);
+                if (result.equals("InvalidValueTypeException")){
+                    throw new InvalidValueTypeException(variableName, DOUBLE);
+                }
             case CHAR:
                 return handleCharValues(variableValue);
             case STRING:
@@ -850,7 +860,7 @@ public class VerificationEngine {
         if (!tokenizer.getCurrentToken().equals("'"))
         {
             //raise error
-            throw new InvalidValueTypeException(variableName, STRING);
+            throw new InvalidValueTypeException(variableName, CHAR);
         }
         tokenizer.advance();
         String result = tokenizer.getCurrentToken();
@@ -866,7 +876,7 @@ public class VerificationEngine {
         return result;
     }
 
-    private String handleDoubleValues(String variableName, String variableValue, String type) throws InvalidValueTypeException {
+    private String handleDoubleValues(String variableValue) {
         String tmp = variableValue;
         String result = tmp;
         if (validIntPattern.matcher(tmp).matches()) {
@@ -881,10 +891,10 @@ public class VerificationEngine {
                 } else if (AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
                     tokenizer.retreat();
                 } else {
-                    throw new InvalidValueTypeException(variableName, type);
+                    return "InvalidValueTypeException";
                 }
             } else if (!AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
-                throw new InvalidValueTypeException(variableName, type);
+                return "InvalidValueTypeException";
             } else {
                 tokenizer.retreat();
             }
@@ -895,10 +905,10 @@ public class VerificationEngine {
                 result += tmp;
             } else {
                 tokenizer.retreat();
-                throw new InvalidValueTypeException(variableName, type);
+                return "InvalidValueTypeException";
             }
         } else {
-            throw new InvalidValueTypeException(variableName, type);
+            return "InvalidValueTypeException";
         }
         return result;
     }
@@ -907,22 +917,25 @@ public class VerificationEngine {
     private String handleBooleanValues(String variableName, String variableValue) throws InvalidValueTypeException {
         // Booleans are either TRUE, FALSE, or valid numeric values (int or double)
         if (!variableValue.equals(TRUE) && !variableValue.equals(FALSE)) {
-            variableValue = handleDoubleValues(variableName, variableValue, BOOLEAN);
+            variableValue = handleDoubleValues(variableValue);
+            if (variableValue.equals("InvalidValueTypeException")){
+                throw new InvalidValueTypeException(variableName, BOOLEAN);
+            }
         }
-        return variableValue;
 
+        return variableValue;
     }
 
     private int verifyManyVariableDeclarations(String variableName, String currentToken) throws InvalidVariableDeclarationException {
         System.out.println(currentToken);
         switch (currentToken) {
-            case EOL_COMMA:
+            case EOL_COMMA -> {
                 return END_OF_LINE;
-            case COMMA:
-//                tokenizer.advance();
+            }
+            case COMMA -> {
                 return MORE_VARIABLES;
-            default:
-                throw new InvalidVariableDeclarationException(variableName, currentToken);
+            }
+            default -> throw new InvalidVariableDeclarationException(variableName, currentToken);
         }
     }
 
@@ -931,30 +944,32 @@ public class VerificationEngine {
 
         // Handle assignment
         switch (currentToken) {
-            case EQUALS:
+            case EQUALS -> {
                 return HAS_VALUE;
+            }
 
             // Handle end of line or single declaration (int a;)
-            case EOL_COMMA:
+            case EOL_COMMA -> {
                 variablesTable.declareVariable(variableName, type, null, isConstant, false);
                 return END_OF_LINE;
+            }
 
             // Handle multiple variable declarations (int a, b;)
-            case COMMA:
+            case COMMA -> {
                 variablesTable.declareVariable(variableName, type, null, isConstant, false);
                 return MORE_VARIABLES;
+            }
 
 
             // Unexpected token
-            default:
-                throw new InvalidVariableDeclarationException(variableName, currentToken);
+            default -> throw new InvalidVariableDeclarationException(variableName, currentToken);
         }
     }
 
 
 
     private String verifyVariableName(String currentToken) throws InvalidVariableName {
-        if (VALID_VARIABLE_REGEX.matches(currentToken)) {
+        if (!tokenizer.isIdentifier(currentToken) || RESERVED_NAMES.contains(currentToken)) {
             throw new InvalidVariableName(currentToken);
         } else {
 //            System.out.println("verify: " + tokenizer.getCurrentToken());

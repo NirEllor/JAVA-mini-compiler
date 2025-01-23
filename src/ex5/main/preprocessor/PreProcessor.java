@@ -15,10 +15,11 @@ public class PreProcessor {
     public String cleanedFilePath = "src/CleanedChatterBot.txt";
     private final FunctionsTable functionsTable;  // Instance of FunctionsTable
 
-    String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
-    String COMMENT_REGEX = "^(\\s*//.*|\\s*)$";
-    String VALID_FUNCTION_REGEX = "^void ([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)";
-    String END_OF_LINE_REGEX = ".*[{};]$";
+    private final String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
+    private final String COMMENT_REGEX = "^(\\s*//.*|\\s*)$";
+    private final String VALID_FUNCTION_REGEX = "^void ([\\w]*)\\s*\\(([^)]*)\\)";
+    private static final String NAME_PATTERN = "^[a-zA-Z]+[\\w]*$";
+    private final String END_OF_LINE_REGEX = ".*[{};]$";
 
     private static final Set<String> TYPES = new HashSet<>(Arrays.asList(
             "int", "char", "boolean", "double", "String"));
@@ -27,7 +28,7 @@ public class PreProcessor {
     public Pattern validFunctionPattern = Pattern.compile(VALID_FUNCTION_REGEX);
     public Pattern validVariablePattern = Pattern.compile(VALID_VARIABLE_REGEX);
     public Pattern endOfLinePattern = Pattern.compile(END_OF_LINE_REGEX);
-
+    private final Pattern namePattern = Pattern.compile(NAME_PATTERN);
 
     public PreProcessor(String filePath, FunctionsTable functionsTable) {
         this.filePath = filePath;
@@ -90,6 +91,9 @@ public class PreProcessor {
                     }
                     while (functionMatcher.find()) {
                         String functionName = functionMatcher.group(1);
+                        if (!namePattern.matcher(functionName).matches()) {
+                            throw new IllegalFunctionName(functionName);
+                        }
                         String params = functionMatcher.group(2);
                         ArrayList<String> paramTypes = parseParameterTypes(params, line);
                         functionsTable.addFunction(functionName, paramTypes);  // Use FunctionsTable instance
@@ -118,7 +122,7 @@ public class PreProcessor {
         } catch (EndOfLineException | UnbalancedParenthesesException |
                  ClosingRightBraceException | FunctionDeclarationException |
                  InvalidFunctionParameterException | FunctionAlreadyDeclaredException |
-                 InvalidLineFormat e) {
+                 InvalidLineFormat | IllegalFunctionName e) {
             System.out.println("1");
             System.err.print(e.getMessage());
             cleanedFilePath = "";

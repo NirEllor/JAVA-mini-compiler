@@ -19,7 +19,7 @@ public class Tokenizer {
 
     // Regex
     private static final String TOKEN_SPLIT = "(" + SYMBOLS_REGEX + "|\\w+)";
-    private static final String IDENTIFIER_PATTERN = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
+    private static final String IDENTIFIER_PATTERN = "^(?!_+$)(?!__)[a-zA-Z0-9_]*$";
 
     // Fields
     private final String[] inputCleanedLines;
@@ -81,6 +81,7 @@ public class Tokenizer {
         while (true) {
             if (!tokensList.isEmpty()) {
                 currentToken = tokensList.remove(NEXT);
+                System.out.println("current : " + currentToken);
             } else {
                 lineIndex++;
                 if (lineIndex < inputCleanedLines.length) {
@@ -99,8 +100,8 @@ public class Tokenizer {
      * Checks if the current token is of type identifier
      * @return : String - The current token's type
      */
-    public boolean isIdentifier() {
-        return currentToken.matches(IDENTIFIER_PATTERN);
+    public boolean isIdentifier(String token) {
+        return token.matches(IDENTIFIER_PATTERN);
     }
 
     /**
