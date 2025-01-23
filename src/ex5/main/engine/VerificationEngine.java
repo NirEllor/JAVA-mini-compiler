@@ -24,8 +24,7 @@ public class VerificationEngine {
     private static final String EQUALS = "=";
     private static final String EOL_COMMA = ";";
     private static final String COMMA = ",";
-    private static final String FALSE = "false";
-    private static final String TRUE = VerificationEngine.TRUE;
+    private static final String FALSE = "false";;
     private static final String DOT = ".";
     private static final String BRACKET_CLOSING = ")";
     private static final String INT = "int";
@@ -54,6 +53,7 @@ public class VerificationEngine {
     public static final String MORE = "more";
     public static final String FEWER = "fewer";
     public static final String FUNCTION_CALL_VAR = "function call var";
+    private static final String TRUE = "true";
 
     // Fields
     private FunctionsTable functionTable;
@@ -239,8 +239,10 @@ public class VerificationEngine {
             if (currToken.equals(RETURN)) {
                 // Return statement
                 returnFlag = verifyReturnStatement();
+            } else {
+                verifyInnerPartOfBlock();
             }
-            verifyInnerPartOfBlock();
+
             currToken = tokenizer.getCurrentToken();
         }
 
@@ -486,7 +488,7 @@ public class VerificationEngine {
             UninitializedVariableInConditionException, IllegalConditionException {
 
         String token = tokenizer.getCurrentToken();
-
+        System.out.println(token);
         if (token.equals(OR) || token.equals(AND)) {
             verifyAndOrCase(blockType);
         } else if (token.equals(TRUE) || token.equals(FALSE)) {

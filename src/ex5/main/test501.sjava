@@ -5,10 +5,10 @@ final int a = 5;
 final int b = a;
 
 // now - a string member
-String s;
+String s = "yuli";
 
-void boo(int a, int b, String s) {
-	if (true) {
+void boo(final int a, int b, String s) {
+	if (1) {
 		boo(1,2,"hello");
 		while (false) {
 			soo(true);
