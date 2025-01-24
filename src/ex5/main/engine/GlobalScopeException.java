@@ -6,7 +6,8 @@ package ex5.main.engine;
 public class GlobalScopeException extends Exception {
 
     // Fields
-    public static final String MESSAGE = "GlobalScopeException: Illegal command in the global scope, check variables  and functions";
+    private static final String MESSAGE = "GlobalScopeException: Illegal command in the global scope, check variables" +
+            " and functions";
 
     /**
      * Returns an error message

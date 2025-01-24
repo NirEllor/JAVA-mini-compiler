@@ -5,9 +5,9 @@ package ex5.main.engine;
  */
 public class ConstantAssignmentException extends Exception {
 
-    public static final String MESSAGE = "ConstantAssignmentException: %s is constant, thus cannot be assigned";
-    // fields
+   // fields
     private final String name;
+    private static final String MESSAGE = "ConstantAssignmentException: %s is constant, thus cannot be assigned";
 
     /**
      * Constructor - Creates a ConstantAssignmentException exception

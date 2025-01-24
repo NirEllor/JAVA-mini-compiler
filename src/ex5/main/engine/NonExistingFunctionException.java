@@ -1,18 +1,30 @@
 package ex5.main.engine;
 
-public class NonExistingFunctionException extends Throwable {
+/**
+ * Exception class for non-existing function
+ */
+public class NonExistingFunctionException extends Exception {
 
-    private static final String  FUNCTION_NAME_PLACEHOLDER = "{functionName}";
-    private static final String MESSAGE = String.format("Error: function %s doesnt exist", FUNCTION_NAME_PLACEHOLDER);
+    // Fields
     private final String functionName;
+    private static final String MESSAGE1 = "NonExistingFunctionException: function ";
+    private static final String MESSAGE2 = " doesnt exist";
 
+    /**
+     * Constructor - Creates a InvalidVariableName exception
+     * @param functionName : String - The functions name
+     */
     public NonExistingFunctionException(String functionName) {
         this.functionName = functionName;
     }
 
+    /**
+     * Returns an error message
+     * @return : String - error message
+     */
     @Override
     public String getMessage() {
-        return MESSAGE.replace(FUNCTION_NAME_PLACEHOLDER, functionName);
+        return MESSAGE1 + functionName + MESSAGE2;
     }
 
 }

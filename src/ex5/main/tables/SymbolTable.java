@@ -143,53 +143,51 @@ public class SymbolTable {
     }
 
 
-    public static void main(String[] args) {
-        SymbolTable symbolTable = new SymbolTable();
-        runTests(symbolTable);
-    }
+//    public static void main(String[] args) {
+//        SymbolTable symbolTable = new SymbolTable();
+//        runTests(symbolTable);
+//    }
 
-    public static void runTests(SymbolTable st) {
-        try {
-            // Test 1: Declare a constant variable
-            st.enterScope();
-            st.declareVariable("x", "int", "1", true, true);
-            System.out.println("Declared constant x in scope 1");
-
-            // Test 2: Attempt reassignment to a constant variable
-            try {
-                st.assignValue("x", "2"); // Expected to throw
-            } catch (ConstantAssignmentException e) {
-                System.err.println(e.getMessage()); // Ignored for testing purposes
-            } catch (UninitializedGlobalVariableException e) {
-                e.getMessage();
-            }
-
-            // Test 3: Declare and assign in nested scope
-            st.enterScope();
-            st.declareVariable("y", "String", "hello", false, true);
-            System.out.println("Declared y in scope 2");
-            st.assignValue("y", "world");
-            System.out.println("Assigned new value to y in scope 2: " + st.getValue("y"));
-
-            // Test 4: Shadowing variable in a nested scope
-            st.declareVariable("x", "int", null, false, true);
-            System.out.println("Declared x in scope 2 (shadowed)");
-//            st.assignValue("x", 20);
-            System.out.println("Assigned new value to x in scope 2: " + st.getValue("x"));
-
-            // Test 5: Exit scope and access variable from parent scope
-            st.exitScope();
-            System.out.println("Exited scope 2");
-            System.out.println("Value of x in scope 1: " + st.getValue("x"));
-
-        } catch (Exception e) {
-            // Catch-all for unexpected issues
-            System.err.println("Test encountered an unexpected error: " + e.getMessage());
-        } catch (VariableAlreadyDeclaredException e) {
-            e.getMessage();
-        } catch (UninitializedGlobalVariableException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static void runTests(SymbolTable st) {
+//        try {
+//            // Test 1: Declare a constant variable
+//            st.enterScope();
+//            st.declareVariable("x", "int", "1", true, true);
+//            System.out.println("Declared constant x in scope 1");
+//
+//            // Test 2: Attempt reassignment to a constant variable
+//            try {
+//                st.assignValue("x", "2"); // Expected to throw
+//            } catch (ConstantAssignmentException e) {
+//                System.err.println(e.getMessage()); // Ignored for testing purposes
+//            } catch (UninitializedGlobalVariableException e) {
+//                e.getMessage();
+//            }
+//
+//            // Test 3: Declare and assign in nested scope
+//            st.enterScope();
+//            st.declareVariable("y", "String", "hello", false, true);
+//            System.out.println("Declared y in scope 2");
+//            st.assignValue("y", "world");
+//            System.out.println("Assigned new value to y in scope 2: " + st.getValue("y"));
+//
+//            // Test 4: Shadowing variable in a nested scope
+//            st.declareVariable("x", "int", null, false, true);
+//            System.out.println("Declared x in scope 2 (shadowed)");
+////            st.assignValue("x", 20);
+//            System.out.println("Assigned new value to x in scope 2: " + st.getValue("x"));
+//
+//            // Test 5: Exit scope and access variable from parent scope
+//            st.exitScope();
+//            System.out.println("Exited scope 2");
+//            System.out.println("Value of x in scope 1: " + st.getValue("x"));
+//
+//        } catch (Exception e) {
+//            // Catch-all for unexpected issues
+//            System.err.println("Test encountered an unexpected error: " + e.getMessage());
+//        } catch (VariableAlreadyDeclaredException e) {
+//            e.getMessage();
+//        }
+//    }
 
 }

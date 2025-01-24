@@ -2,7 +2,7 @@ package ex5.main.preprocessor;
 
 import ex5.main.tables.FunctionsTable;
 import ex5.main.engine.InvalidCommentException;
-import ex5.main.engine.InvalidLineFormat;
+import ex5.main.engine.InvalidLineFormatException;
 
 import java.io.*;
 import java.util.*;
@@ -15,7 +15,7 @@ public class PreProcessor {
     public String cleanedFilePath = "src/CleanedChatterBot.txt";
     private final FunctionsTable functionsTable;  // Instance of FunctionsTable
 
-    private final String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z_][a-zA-Z0-9_]*$";
+    private final String VALID_VARIABLE_REGEX = "^(?!_+$)(?!__)[a-zA-Z0-9_]*$";
     private final String COMMENT_REGEX = "^(\\s*//.*|\\s*)$";
     private final String VALID_FUNCTION_REGEX = "^void ([\\w]*)\\s*\\(([^)]*)\\)";
     private static final String NAME_PATTERN = "^[a-zA-Z]+[\\w]*$";
@@ -81,7 +81,7 @@ public class PreProcessor {
                 }
 
                 if (line.chars().filter(ch -> ch == ';').count() >= 2){
-                    throw new InvalidLineFormat();
+                    throw new InvalidLineFormatException();
                 }
 
                 if (line.startsWith(VOID)){
@@ -122,7 +122,7 @@ public class PreProcessor {
         } catch (EndOfLineException | UnbalancedParenthesesException |
                  ClosingRightBraceException | FunctionDeclarationException |
                  InvalidFunctionParameterException | FunctionAlreadyDeclaredException |
-                 InvalidLineFormat | IllegalFunctionName e) {
+                 InvalidLineFormatException | IllegalFunctionName e) {
             System.out.println("1");
             System.err.print(e.getMessage());
             cleanedFilePath = "";
