@@ -1,8 +1,8 @@
 package ex5.main;
 
-import ex5.main.engine.VerificationEngine;
-import ex5.main.preprocessor.PreProcessor;
-import ex5.main.tables.FunctionsTable;
+import engine.VerificationEngine;
+import preprocessor.PreProcessor;
+import tables.FunctionsTable;
 
 import java.io.IOException;
 import java.nio.file.Path;
