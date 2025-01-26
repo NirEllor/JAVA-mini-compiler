@@ -81,7 +81,6 @@ public class Tokenizer {
         while (true) {
             if (!tokensList.isEmpty()) {
                 currentToken = tokensList.remove(NEXT);
-                System.out.println("current : " + currentToken);
             } else {
                 lineIndex++;
                 if (lineIndex < inputCleanedLines.length) {

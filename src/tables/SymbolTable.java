@@ -4,22 +4,24 @@ import engine.ConstantAssignmentException;
 import engine.ConstantNonAssignmentException;
 import engine.UninitializedGlobalVariableException;
 import engine.VariableAlreadyDeclaredException;
-
 import java.util.*;
 
 public class SymbolTable {
+    private static final String NOT_DECLARED_IN_ANY_ACCESSIBLE_SCOPE = "Variable ' %s ' not declared " +
+            "in any accessible scope";
     // Outer map: scope number -> (variable name -> (type, value, is constant))
-    private final HashMap<Integer, HashMap<String, Triple>> variablesMap = new HashMap<>();
+    private final HashMap<Integer, HashMap<String, VariableInformation>> variablesMap
+            = new HashMap<>();
     private int currentScope = 0;
 
-    static class Triple {
+    private static class VariableInformation {
         private final Stack<String> globalVariableValuesStack;
         private int lastUpdatedScope;
         String type;
         String value;
         boolean isConstant;
 
-        Triple(String type, String value, boolean isConstant) {
+        private VariableInformation(String type, String value, boolean isConstant) {
             this.type = type;
             this.value = value;
             this.isConstant = isConstant;
@@ -27,16 +29,11 @@ public class SymbolTable {
             this.lastUpdatedScope = 0;
         }
 
-        @Override
-        public String toString() {
-            return "(" + type + ", " + value + ")";
-        }
     }
 
     public void enterScope() {
         currentScope++;
         variablesMap.put(currentScope, new HashMap<>());
-        printSymbolTable();
     }
 
     public int getCurrentScope() {
@@ -46,14 +43,12 @@ public class SymbolTable {
 
 
     public void exitScope() {
-        printSymbolTable();
-        HashMap<String, Triple> globalVariables = variablesMap.get(1);
+        HashMap<String, VariableInformation> globalVariables = variablesMap.get(1);
         if (globalVariables != null) {
-            for (Map.Entry<String, Triple> entry : globalVariables.entrySet()) {
+            for (Map.Entry<String, VariableInformation> entry : globalVariables.entrySet()) {
                 if (entry.getValue().lastUpdatedScope == getCurrentScope()) {
                     entry.getValue().globalVariableValuesStack.pop();
                     entry.getValue().lastUpdatedScope--;
-                    System.out.println(entry.getValue().globalVariableValuesStack);
                     entry.getValue().value = entry.getValue().globalVariableValuesStack.peek();
                 }
             }
@@ -63,9 +58,10 @@ public class SymbolTable {
 
     }
 
-    public void declareVariable(String name, String type, String value, boolean isConstant, boolean isParameter)
+    public void declareVariable(String name, String type, String value, boolean isConstant,
+                                boolean isParameter)
             throws VariableAlreadyDeclaredException, ConstantNonAssignmentException {
-        HashMap<String, Triple> currentScopeMap = variablesMap.get(currentScope);
+        HashMap<String, VariableInformation> currentScopeMap = variablesMap.get(currentScope);
 
         if (currentScopeMap.containsKey(name)) {
             throw new VariableAlreadyDeclaredException(name);
@@ -74,15 +70,15 @@ public class SymbolTable {
             throw new ConstantNonAssignmentException(name);
         }
 
-        currentScopeMap.put(name, new Triple(type, value, isConstant));
+        currentScopeMap.put(name, new VariableInformation(type, value, isConstant));
         if (getCurrentScope() == 1) {
             variablesMap.get(1).get(name).globalVariableValuesStack.push(value);
             variablesMap.get(1).get(name).lastUpdatedScope++;
-            System.out.println(variablesMap.get(1).get(name).globalVariableValuesStack);
         }
     }
 
-    public void assignValue(String name, String value) throws ConstantAssignmentException, UninitializedGlobalVariableException {
+    public void assignValue(String name, String value) throws ConstantAssignmentException,
+            UninitializedGlobalVariableException {
         int scope = findVariableScope(name); // might throw if not assigned
         if (scope == 1 && getCurrentScope() != 1 && getValue(name) == null) {
             throw new UninitializedGlobalVariableException(name);
@@ -90,7 +86,7 @@ public class SymbolTable {
         if (variablesMap.get(scope).get(name).isConstant) {
             throw new ConstantAssignmentException(name);
         }
-        Triple Triple = variablesMap.get(scope).get(name);
+        VariableInformation Triple = variablesMap.get(scope).get(name);
         Triple.value = value;
         if (scope == 1) {
             variablesMap.get(scope).get(name).globalVariableValuesStack.push(value);
@@ -132,62 +128,7 @@ public class SymbolTable {
                 return scope;
             }
         }
-        throw new IllegalArgumentException("Variable '" + name + "' not declared in any accessible scope");
+        throw new IllegalArgumentException(String.format(NOT_DECLARED_IN_ANY_ACCESSIBLE_SCOPE, name));
     }
-    public void printSymbolTable() {
-        System.out.println("Symbol Table:");
-        for (int scope : variablesMap.keySet()) {
-            System.out.println("Scope " + scope + ": " + variablesMap.get(scope));
-        }
-
-    }
-
-
-//    public static void main(String[] args) {
-//        SymbolTable symbolTable = new SymbolTable();
-//        runTests(symbolTable);
-//    }
-
-//    public static void runTests(SymbolTable st) {
-//        try {
-//            // Test 1: Declare a constant variable
-//            st.enterScope();
-//            st.declareVariable("x", "int", "1", true, true);
-//            System.out.println("Declared constant x in scope 1");
-//
-//            // Test 2: Attempt reassignment to a constant variable
-//            try {
-//                st.assignValue("x", "2"); // Expected to throw
-//            } catch (ConstantAssignmentException e) {
-//                System.err.println(e.getMessage()); // Ignored for testing purposes
-//            } catch (UninitializedGlobalVariableException e) {
-//                e.getMessage();
-//            }
-//
-//            // Test 3: Declare and assign in nested scope
-//            st.enterScope();
-//            st.declareVariable("y", "String", "hello", false, true);
-//            System.out.println("Declared y in scope 2");
-//            st.assignValue("y", "world");
-//            System.out.println("Assigned new value to y in scope 2: " + st.getValue("y"));
-//
-//            // Test 4: Shadowing variable in a nested scope
-//            st.declareVariable("x", "int", null, false, true);
-//            System.out.println("Declared x in scope 2 (shadowed)");
-////            st.assignValue("x", 20);
-//            System.out.println("Assigned new value to x in scope 2: " + st.getValue("x"));
-//
-//            // Test 5: Exit scope and access variable from parent scope
-//            st.exitScope();
-//            System.out.println("Exited scope 2");
-//            System.out.println("Value of x in scope 1: " + st.getValue("x"));
-//
-//        } catch (Exception e) {
-//            // Catch-all for unexpected issues
-//            System.err.println("Test encountered an unexpected error: " + e.getMessage());
-//        } catch (VariableAlreadyDeclaredException e) {
-//            e.getMessage();
-//        }
-//    }
 
 }
