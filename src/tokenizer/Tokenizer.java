@@ -12,9 +12,6 @@ public class Tokenizer {
     // Constants
     private static final String SYMBOLS_REGEX = "[{}()\\[\\],;~%^+/$.\\-#@*~&|<>=\"']";
     private static final int NEXT = 0;
-    private static final int LINE_INDEX = 0;
-    private static final int TOKEN_LIST_INDEX = 1;
-    private static final int CURRENT_TOKEN_INDEX = 2;
     private static final int EMPTY = 0;
 
     // Regex
@@ -26,7 +23,7 @@ public class Tokenizer {
     private int lineIndex;
     private List<String> tokensList;
     private String currentToken;
-    private Object[] lookAheadBuffer;
+    private TokensBuffer lookAheadBuffer;
 
     /**
      * Constructor - Creates a Tokenizer object and tokenizes the first line
@@ -115,7 +112,7 @@ public class Tokenizer {
      * Advances one token ahead and saves the prev
      */
     public void lookAhead() {
-        lookAheadBuffer = new Object[]{lineIndex, new ArrayList<>(tokensList), currentToken};
+        lookAheadBuffer = new TokensBuffer(lineIndex, currentToken, new ArrayList<>(tokensList));
         advance();
     }
 
@@ -124,9 +121,9 @@ public class Tokenizer {
      */
     public void retreat() {
         if (lookAheadBuffer != null) {
-            lineIndex = (int) lookAheadBuffer[LINE_INDEX];
-            tokensList = (List<String>) lookAheadBuffer[TOKEN_LIST_INDEX];
-            currentToken = (String) lookAheadBuffer[CURRENT_TOKEN_INDEX];
+            lineIndex = lookAheadBuffer.getIndex();
+            tokensList = lookAheadBuffer.getTokens();
+            currentToken = lookAheadBuffer.getCurrentToken();
             lookAheadBuffer = null;
         }
     }
