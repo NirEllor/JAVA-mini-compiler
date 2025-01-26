@@ -4,7 +4,7 @@ package engine;
  * Exception class for uninitialized global variable assignment from an inner scope
  */
 public class UninitializedGlobalVariableException extends Exception {
-    public static final String MESSAGE = "UninitializedGlobalVariableException: Uninitialized global variable '%s'";
+    private static final String MESSAGE = "UninitializedGlobalVariableException: Uninitialized global variable '%s'";
     private final String name;
 
     /**

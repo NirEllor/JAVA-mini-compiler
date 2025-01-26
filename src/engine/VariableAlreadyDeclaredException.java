@@ -5,8 +5,8 @@ package engine;
  */
 public class VariableAlreadyDeclaredException extends Exception {
 
-    public static final String MESSAGE1 = "VariableAlreadyDeclaredException: Variable '";
-    public static final String MESSAGE2 = "' already declared in the current scope";
+    private static final String MESSAGE1 = "VariableAlreadyDeclaredException: Variable '";
+    private static final String MESSAGE2 = "' already declared in the current scope";
     // Field
     private final String name;
 
