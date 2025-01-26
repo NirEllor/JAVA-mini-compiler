@@ -46,7 +46,8 @@ public class VerificationEngine {
     private static final int VARIABLE_NOT_DECLARED = 0;
     private static final String SUCCESS = "0";
     private static final String IO_EXCEPTION = "2";
-    private static final String IO_EXCEPTION_MESSAGE = "Occurred a problem while the opening/closing the file";
+    private static final String IO_EXCEPTION_MESSAGE = "Occurred a problem while the opening/closing " +
+            "the file";
     private static final String EXCEPTION = "1";
     private static final String INVALID_VALUE_TYPE_EXCEPTION = "InvalidValueTypeException";
     private static final int THREE = 3;

@@ -7,7 +7,8 @@ package preprocessor;
  */
 public class UnbalancedParenthesesException extends Exception {
 
-    private static final String EXCEPTION_MESSAGE = "UnbalancedParenthesesException: File have unbalanced parentheses";
+    private static final String EXCEPTION_MESSAGE = "UnbalancedParenthesesException: File have" +
+            "unbalanced parentheses";
 
     /**
      * Returns the detail message of this exception.
