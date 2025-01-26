@@ -12,10 +12,13 @@ first regex: ^void ([\w]*)\s*\(([^)]*)\)
 This regex is designed to match strings that corresponds to a function declaration.
 
 This regex is designed to match and extract the structure of a function declaration.
-We used it to firstly verify the format of function declaration, and then verified the inner parts of it.
+We used it to firstly verify the format of function declaration, and then verified the inner parts
+    of it.
 
 1. ^ : Ensures the match begins at the start of the string.
-2. void : Matches the literal keyword void, commonly used in programming to denote a function that doesn’t return a value.
+2. void : Matches the literal keyword void, commonly used in programming to denote a function that
+    doesn’t
+return a value.
 3. ([\w]*) Capturing Group 1 (([\w]*)) :
     [\w]: Matches any "word character" (letters a-z, A-Z, digits 0-9, or underscores _).
     *: Matches zero or more of these word characters.
@@ -24,12 +27,13 @@ We used it to firstly verify the format of function declaration, and then verifi
     \s: Matches any whitespace character (spaces, tabs, newlines, etc.).
     *: Matches zero or more whitespace characters.
     Purpose: Allows for optional spaces between the function name and the opening parenthesis (.
-5. \( : Matches the literal opening parenthesis (, which marks the start of the function’s parameter list.
+5. \( : Matches the literal opening parenthesis (, which marks the start of the function’s parameter
+    list.
 6. ([^)]*) : Capturing Group 2 (([^)]*)):
     [^)]: Matches any character that is not a closing parenthesis ).
     *: Matches zero or more of these characters.
-    This group captures everything inside the parentheses (the parameter list), including arguments or an empty
-     string if no parameters are present.
+    This group captures everything inside the parentheses (the parameter list), including arguments
+    or an empty string if no parameters are present.
 7. \) : Matches the literal closing parenthesis ).
 
 
