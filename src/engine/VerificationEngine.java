@@ -48,6 +48,7 @@ public class VerificationEngine {
     private static final String IO_EXCEPTION = "2";
     private static final String IO_EXCEPTION_MESSAGE = "Occurred a problem while the opening/closing the file";
     private static final String EXCEPTION = "1";
+    private static final String INVALID_VALUE_TYPE_EXCEPTION = "InvalidValueTypeException";
     private static final int THREE = 3;
     private static final int TWO = 2;
     private static final String MORE = "more";
@@ -523,7 +524,7 @@ public class VerificationEngine {
             tokenizer.advance();
         } else if (variablesTable.isVariableDeclared(token) > VARIABLE_NOT_DECLARED) {
                 verifyCaseUninitializedVariableInBlockCondition(token, blockType);
-        } else if (handleDoubleValues(token).equals("InvalidValueTypeException")) {
+        } else if (handleDoubleValues(token).equals(INVALID_VALUE_TYPE_EXCEPTION)) {
             // Case 3 : A double or int constant/value (e.g. 5, -3, -21.5).
             throw new IllegalConditionException(blockType);
         } else {
@@ -668,7 +669,7 @@ public class VerificationEngine {
             }
 
             case DOUBLE:{
-                if (handleDoubleValues(currentToken).equals("InvalidValueTypeException")){
+                if (handleDoubleValues(currentToken).equals(INVALID_VALUE_TYPE_EXCEPTION)){
                     throw new InvalidValueTypeException(FUNCTION_CALL_VAR, DOUBLE);
                 }
                 break;
@@ -850,7 +851,7 @@ public class VerificationEngine {
                 return handleIntValue(variableName, variableValue);
             case DOUBLE:
                 String result =  handleDoubleValues(variableValue);
-                if (result.equals("InvalidValueTypeException")){
+                if (result.equals(INVALID_VALUE_TYPE_EXCEPTION)){
                     throw new InvalidValueTypeException(variableName, DOUBLE);
                 }
             case CHAR:
@@ -923,10 +924,10 @@ public class VerificationEngine {
                 } else if (AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
                     tokenizer.retreat();
                 } else {
-                    return "InvalidValueTypeException";
+                    return INVALID_VALUE_TYPE_EXCEPTION;
                 }
             } else if (!AFTER_VARIABLE_VALUE_SYMBOLS.contains(tmp)) {
-                return "InvalidValueTypeException";
+                return INVALID_VALUE_TYPE_EXCEPTION;
             } else {
                 tokenizer.retreat();
             }
@@ -937,10 +938,10 @@ public class VerificationEngine {
                 result += tmp;
             } else {
                 tokenizer.retreat();
-                return "InvalidValueTypeException";
+                return INVALID_VALUE_TYPE_EXCEPTION;
             }
         } else {
-            return "InvalidValueTypeException";
+            return INVALID_VALUE_TYPE_EXCEPTION;
         }
         return result;
     }
@@ -951,7 +952,7 @@ public class VerificationEngine {
         // Booleans are either TRUE, FALSE, or valid numeric values (int or double)
         if (!variableValue.equals(TRUE) && !variableValue.equals(FALSE)) {
             variableValue = handleDoubleValues(variableValue);
-            if (variableValue.equals("InvalidValueTypeException")){
+            if (variableValue.equals(INVALID_VALUE_TYPE_EXCEPTION)){
                 throw new InvalidValueTypeException(variableName, BOOLEAN);
             }
         }
