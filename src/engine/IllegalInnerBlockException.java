@@ -6,7 +6,8 @@ package engine;
 public class IllegalInnerBlockException extends Exception {
 
     // Field
-    private static final String MESSAGE = "IllegalInnerBlockException: There is an illegal command in a block";
+    private static final String MESSAGE = "IllegalInnerBlockException: There is an illegal " +
+            "command in a block";
 
     /**
      * Returns an error message

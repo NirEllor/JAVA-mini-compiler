@@ -6,7 +6,8 @@ package engine;
 public class UninitializedVariableInConditionException extends Exception {
 
     // Fields
-    private static final String MESSAGE = "UninitializedVariableInConditionException: variable {var} is uninitialized" +
+    private static final String MESSAGE = "UninitializedVariableInConditionException: " +
+            "variable {var} is uninitialized" +
             " in the {block} condition. ";
     private static final String VAR_PLACEHOLDER = "{var}";
     private static final String BLOCK_PLACEHOLDER = "{block}";

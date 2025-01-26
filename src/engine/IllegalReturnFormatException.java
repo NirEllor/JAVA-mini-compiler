@@ -6,7 +6,8 @@ package engine;
 public class IllegalReturnFormatException extends Exception {
 
     // Fields
-    private static final String MESSAGE = "IllegalReturnFormatException: illegal return format. Must be written like : return;";
+    private static final String MESSAGE = "IllegalReturnFormatException: illegal return format. " +
+            "Must be written like : return;";
 
     /**
      * Returns an error message

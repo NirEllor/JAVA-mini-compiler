@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class tokenizes the file token by token using regex. Also can return the tokens type.
+ * This class tokenizes the file token by token using regex. Also, can return the tokens type.
  */
 public class Tokenizer {
 

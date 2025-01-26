@@ -6,10 +6,11 @@ package engine;
 public class InvalidValueTypeException extends Exception {
 
 
+    private static final String IS_OF_TYPE = " is of type ";
+    private static final String MESSAGE = "InvalidValueTypeException: variable ";
     // Fields
     private final String variableName;
     private final String type;
-    private static final String MESSAGE = "InvalidValueTypeException: variable ";
 
     /**
      * Constructor - Creates a InvalidValueTypeException exception
@@ -27,6 +28,6 @@ public class InvalidValueTypeException extends Exception {
      */
     @Override
     public String getMessage() {
-        return MESSAGE + variableName + " is of type " + type;
+        return MESSAGE + variableName + IS_OF_TYPE + type;
     }
 }

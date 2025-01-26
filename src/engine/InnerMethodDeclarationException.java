@@ -6,8 +6,8 @@ package engine;
 public class InnerMethodDeclarationException extends Exception {
 
     // Fields
-    private static final String MESSAGE = "InnerMethodDeclarationException: It is illegal to declare a method inside" +
-            " a method";
+    private static final String MESSAGE = "InnerMethodDeclarationException: It is illegal to declare " +
+            "a method inside a method";
 
     /**
      * Returns an error message

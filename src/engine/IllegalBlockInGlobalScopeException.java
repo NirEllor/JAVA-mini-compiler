@@ -7,7 +7,8 @@ public class IllegalBlockInGlobalScopeException extends Exception {
 
     // Fields
     private static final String PLACE_PLACEHOLDER = "{type}";
-    private static final String MESSAGE = "IllegalBlockInGlobalScopeException: {type} block can appear only in a function, " +
+    private static final String MESSAGE = "IllegalBlockInGlobalScopeException: {type} block can appear " +
+            "only in a function, " +
             "but was detected in the global scope";
     private final String blockType;
 

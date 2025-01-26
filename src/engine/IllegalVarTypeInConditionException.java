@@ -6,7 +6,8 @@ package engine;
 public class IllegalVarTypeInConditionException extends Exception {
 
     // Fields
-    private static final String MESSAGE = "IllegalVarTypeInConditionException: {type} is an illegal variable type" +
+    private static final String MESSAGE = "IllegalVarTypeInConditionException: {type} is an illegal " +
+            "variable type" +
             " for condition of a {block}";
     private static final String TYPE_PLACEHOLDER = "{type}";
     private static final String BLOCK_PLACEHOLDER = "{block}";

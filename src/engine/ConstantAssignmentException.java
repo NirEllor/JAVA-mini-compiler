@@ -7,7 +7,8 @@ public class ConstantAssignmentException extends Exception {
 
    // fields
     private final String name;
-    private static final String MESSAGE = "ConstantAssignmentException: %s is constant, thus cannot be assigned";
+    private static final String MESSAGE = "ConstantAssignmentException: %s is constant, thus " +
+            "cannot be assigned";
 
     /**
      * Constructor - Creates a ConstantAssignmentException exception

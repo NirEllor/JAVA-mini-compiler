@@ -6,7 +6,8 @@ package engine;
 public class ConstantNonAssignmentException extends Exception {
 
     // Fields
-    private static final String MESSAGE = "ConstantNonAssignmentException: Constant variable %s cannot be null";
+    private static final String MESSAGE = "ConstantNonAssignmentException: Constant variable %s " +
+            "cannot be null";
     private final String name;
 
     /**

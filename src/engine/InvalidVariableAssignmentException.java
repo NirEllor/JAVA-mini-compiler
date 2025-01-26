@@ -3,8 +3,10 @@ package engine;
 /**
  * Exception class for invalid assignment of a variable
  */
-public class InvalidVariableAssignmentException extends Throwable {
+public class InvalidVariableAssignmentException extends Exception {
 
+    private static final String EXCEPTION_MESSAGE = "InvalidVariableAssignmentException: %s was not " +
+            "assigned properly";
     // Field
     private final String variableName;
 
@@ -22,6 +24,6 @@ public class InvalidVariableAssignmentException extends Throwable {
      */
     @Override
     public String getMessage() {
-        return variableName + " was not assigned properly";
+        return String.format(EXCEPTION_MESSAGE, variableName);
     }
 }

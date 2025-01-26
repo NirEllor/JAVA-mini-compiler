@@ -6,8 +6,10 @@ package engine;
 public class IllegalConditionException extends Exception {
 
     // Fields
-    private static final String MESSAGE = "IllegalConditionException: Illegal condition in {block} block. Condition" +
-            " is a boolean value that is either: One of the reserved words is true or false / An initialized boolean,"
+    private static final String MESSAGE = "IllegalConditionException: Illegal condition in {block} " +
+            "block. Condition" +
+            " is a boolean value that is either: One of the reserved words is true or false / An " +
+            "initialized boolean,"
             + " double or int variable / A double or int constant/value Each one can be separated with " +
             "one \"&&\" or \"||\"";
     private static final String BLOCK_PLACEHOLDER = "{block}";
