@@ -31,7 +31,7 @@ public class PreProcessor {
     private static final String COMMENT_PREFIX = "//";
     private static final String INVALID_COMMENT_OPENING = "*/";
     private static final int VARIABLE_ASSIGNED_LENGTH = 3;
-    private String cleanedFilePath = "src/CleanedChatterBot.sjava";
+    private String cleanedFilePath = "src/CleanedFile.sjava";
 
     private static final String INT = "int";
     private static final String CHAR = "char";
