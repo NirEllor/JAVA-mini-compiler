@@ -15,6 +15,9 @@ public class IllegalVarTypeInConditionException extends Exception {
      * type of variable
      */
     private final String varType;
+    /**
+     * block type
+     */
     private final String blockType;
 
     /**
