@@ -8,6 +8,9 @@ public class EmptyConditionException extends Exception {
     // Fields
     private static final String MESSAGE = "EmptyConditionException: Empty condition in {block} block";
     private static final String BLOCK_PLACEHOLDER = "{block}";
+    /**
+     * block type
+     */
     private final String blockType;
 
     /**

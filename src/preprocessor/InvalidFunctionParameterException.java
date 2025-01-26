@@ -9,6 +9,9 @@ package preprocessor;
 
     private static final String EXCEPTION_MESSAGE = "InvalidFunctionParameterException: Invalid function " +
             "parameter declaration in line: %s";
+    /**
+     * The line
+     */
     private final String line;
     /**
      * Constructs a new {@code InvalidFunctionParameterException} with the specified line

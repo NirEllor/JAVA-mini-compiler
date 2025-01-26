@@ -6,6 +6,9 @@ package engine;
 public class ConstantAssignmentException extends Exception {
 
    // fields
+    /**
+     * constant name
+     */
     private final String name;
     private static final String MESSAGE = "ConstantAssignmentException: %s is constant, thus " +
             "cannot be assigned";

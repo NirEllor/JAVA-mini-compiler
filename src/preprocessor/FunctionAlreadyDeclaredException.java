@@ -7,6 +7,9 @@ package preprocessor;
 public class FunctionAlreadyDeclaredException extends Exception {
     private static final String EXCEPTION_MESSAGE = "FunctionAlreadyDeclaredException: 2 " +
             "methods with the same name: %s";
+    /**
+     * function name
+     */
     private final String functionName;
 
     /**

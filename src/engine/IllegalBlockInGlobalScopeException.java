@@ -10,6 +10,9 @@ public class IllegalBlockInGlobalScopeException extends Exception {
     private static final String MESSAGE = "IllegalBlockInGlobalScopeException: {type} block can appear " +
             "only in a function, " +
             "but was detected in the global scope";
+    /**
+     * block type
+     */
     private final String blockType;
 
     /**

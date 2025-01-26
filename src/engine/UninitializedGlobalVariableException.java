@@ -6,6 +6,9 @@ package engine;
 public class UninitializedGlobalVariableException extends Exception {
     private static final String MESSAGE = "UninitializedGlobalVariableException: " +
             "Uninitialized global variable '%s'";
+    /**
+     * global variable name
+     */
     private final String name;
 
     /**

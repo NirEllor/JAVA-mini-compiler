@@ -7,6 +7,9 @@ package preprocessor;
 public class EndOfLineException extends Exception {
     private static final String EXCEPTION_MESSAGE = "EndOfLineException: End of line does not end with " +
             "';', '{' or '}': %s ";
+    /**
+     * The line
+     */
     private final String line;
 
     /**

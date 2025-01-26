@@ -8,6 +8,9 @@ public class InvalidVariableAssignmentException extends Exception {
     private static final String EXCEPTION_MESSAGE = "InvalidVariableAssignmentException: %s was not " +
             "assigned properly";
     // Field
+    /**
+     * variable name
+     */
     private final String variableName;
 
     /**

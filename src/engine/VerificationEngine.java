@@ -58,8 +58,8 @@ public class VerificationEngine {
     private static final String EMPTY_STRING = "";
     private static final String STRING_QUOTE = "\"";
     private static final String CHAR_QUOTE = "'";
-    public static final String PLUS = "+";
-    public static final String MINUS = "-";
+    private static final String PLUS = "+";
+    private static final String MINUS = "-";
 
     // Fields
     private FunctionsTable functionTable;

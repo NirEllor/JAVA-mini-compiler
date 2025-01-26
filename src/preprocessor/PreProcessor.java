@@ -8,6 +8,16 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
+/**
+ * The {@code PreProcessor} class is responsible for preprocessing a source file
+ * by performing tasks such as:
+ * <ul>
+ *     <li>Cleaning the file: Removing comments and empty lines.</li>
+ *     <li>Processing the cleaned file: Validating syntax, collecting function names, and checking parentheses balance.</li>
+ * </ul>
+ * It ensures that the source file adheres to specific rules and formats, and any violations
+ * are reported via exceptions or error messages.
+ */
 public class PreProcessor {
     private static final String VOID = "void";
     private static final String FINAL = "final";
@@ -56,7 +66,12 @@ public class PreProcessor {
     private final String filePath;
     private final FunctionsTable functionsTable;  // Instance of FunctionsTable
 
-
+    /**
+     * Constructs a {@code PreProcessor} for the specified file and functions table.
+     *
+     * @param filePath       the path of the source file to be preprocessed
+     * @param functionsTable the {@code FunctionsTable} instance for managing function declarations
+     */
     public PreProcessor(String filePath, FunctionsTable functionsTable) {
         this.filePath = filePath;
         this.functionsTable = functionsTable;
@@ -188,8 +203,18 @@ public class PreProcessor {
                 (open == OPEN_SQUARE_BRACKET_CHAR && close == CLOSE_SQUARE_BRACKETS_CHAR);
     }
 
-    // Runs the preprocessor (cleaning and processing)
-    public String run()  {
+    /**
+     * Runs the preprocessing steps on the source file.
+     * <ul>
+     *     <li>Cleans the file by removing comments and empty lines.</li>
+     *     <li>Processes the cleaned file to validate syntax, check for balanced parentheses, and collect function names.</li>
+     * </ul>
+     * If any error occurs during these steps (e.g., invalid comments, syntax errors, or unbalanced parentheses),
+     * an appropriate error message is printed, and the cleaned file path is invalidated.
+     *
+     * @return the path to the cleaned file if preprocessing is successful,
+     *         or an empty string if an error occurs
+     */    public String run()  {
         try {
             cleanFile();
             processCleanedFile();

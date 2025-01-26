@@ -11,7 +11,13 @@ public class UninitializedVariableInConditionException extends Exception {
             " in the {block} condition. ";
     private static final String VAR_PLACEHOLDER = "{var}";
     private static final String BLOCK_PLACEHOLDER = "{block}";
+    /**
+     * variable name
+     */
     private final String name;
+    /**
+     * block type
+     */
     private final String blockType;
 
     /**

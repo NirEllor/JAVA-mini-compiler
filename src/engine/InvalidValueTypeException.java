@@ -9,7 +9,13 @@ public class InvalidValueTypeException extends Exception {
     private static final String IS_OF_TYPE = " is of type ";
     private static final String MESSAGE = "InvalidValueTypeException: variable ";
     // Fields
+    /**
+     * variable name
+     */
     private final String variableName;
+    /**
+     * value type
+     */
     private final String type;
 
     /**

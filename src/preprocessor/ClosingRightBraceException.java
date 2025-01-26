@@ -8,6 +8,9 @@ public class ClosingRightBraceException extends Exception {
     private static final String EXCEPTION_MESSAGE = "ClosingRightBraceException: The line \" %s \" has a " +
             "rightBrace {' which should be in " +
             "a separate line";
+    /**
+     * The line
+     */
     private final String line;
 
     /**

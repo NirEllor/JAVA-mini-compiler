@@ -14,13 +14,15 @@ import java.util.Objects;
  */
 public class Sjavac {
 
-    public static final String EXTENSION = ".sjava";
-    public static final String IO_ERROR = "2";
-    public static final String IOEXCEPTION_WRONG_FILE_FORMAT_NOT_SJAVA = "IOException: Wrong file format (not sjava).";
-    public static final String IOEXCEPTION_ILLEGAL_NUMBER_OF_ARGUMENTS_FOR_THE_PROGRAM = "IOException: Illegal Number of arguments for the program";
-    public static final int LEGAL_LENGTH = 1;
-    public static final int PATH_INDEX = 0;
-    public static final String EMPTY_STR = "";
+    private static final String EXTENSION = ".sjava";
+    private static final String IO_ERROR = "2";
+    private static final String IOEXCEPTION_WRONG_FILE_FORMAT_NOT_SJAVA = "IOException: " +
+            "Wrong file format (not sjava).";
+    private static final String IOEXCEPTION_ILLEGAL_NUMBER_OF_ARGUMENTS_FOR_THE_PROGRAM = "IOException: " +
+            "Illegal Number of arguments for the program";
+    private static final int LEGAL_LENGTH = 1;
+    private static final int PATH_INDEX = 0;
+    private static final String EMPTY_STR = "";
 
     /**
      * The main function of the program. Preprocess the file, and verifies it using PreProcessor

@@ -6,6 +6,9 @@ package engine;
 public class NonExistingFunctionException extends Exception {
 
     // Fields
+    /**
+     * function name
+     */
     private final String functionName;
     private static final String MESSAGE1 = "NonExistingFunctionException: function ";
     private static final String MESSAGE2 = " doesnt exist";

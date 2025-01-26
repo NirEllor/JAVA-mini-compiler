@@ -8,6 +8,9 @@ public class InvalidVariableNameException extends Exception {
     // Fields
     private static final String MESSAGE1 = "InvalidVariableNameException name '";
     private static final String MESSAGE2 = "' is invalid variable name";
+    /**
+     * variable name
+     */
     private final String variableName;
 
     /**

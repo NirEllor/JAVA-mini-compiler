@@ -11,6 +11,9 @@ public class IllegalVarTypeInConditionException extends Exception {
             " for condition of a {block}";
     private static final String TYPE_PLACEHOLDER = "{type}";
     private static final String BLOCK_PLACEHOLDER = "{block}";
+    /**
+     * type of variable
+     */
     private final String varType;
     private final String blockType;
 

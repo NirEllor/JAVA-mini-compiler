@@ -7,6 +7,9 @@ package preprocessor;
 public class IllegalFunctionName extends Exception {
 
     private static final String MESSAGE = "IllegalFunctionName: illegal function name of function: ";
+    /**
+     * function name
+     */
     private final String functionName;
     /**
      * Constructs a new {@code IllegalFunctionName} with the specified function name

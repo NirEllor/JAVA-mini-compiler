@@ -8,6 +8,9 @@ public class FunctionDeclarationException extends Exception {
 
     private static final String EXCEPTION_MESSAGE = "FunctionDeclarationException: illegal " +
             "function declaration in line: %s";
+    /**
+     * The line
+     */
     private final String line;
 
     /**

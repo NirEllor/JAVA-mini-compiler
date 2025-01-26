@@ -11,7 +11,13 @@ public class NumberOfVarsInFuncCallException extends Exception {
     private static final String MESSAGE = String.format("NumberOfVarsInFuncCallException: " +
             "There are %s variables than" +
             " needed in the call for %s function", CASE_PLACEHOLDER, FUNCTION_NAME_PLACEHOLDER);
+    /**
+     * case of error
+     */
     private final String caseOfError;
+    /**
+     * function name
+     */
     private final String functionName;
 
     /**

@@ -9,6 +9,9 @@ public class NonExistingVariableException extends Exception {
     private static final String PLACE_PLACEHOLDER = "{name}";
     private static final String MESSAGE = "NonExistingVariableException: variable {name} doesnt exist" +
             "in this scope or earlier";
+    /**
+     * variable name
+     */
     private final String name;
 
     /**

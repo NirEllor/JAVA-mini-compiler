@@ -11,6 +11,9 @@ public class CallFunctionFromGlobalException extends Exception {
             "call to function" +
             " %s from global scope. You can call a function only from other function",
             FUNCTION_NAME_PLACEHOLDER);
+    /**
+     * The function name
+     */
     private final String functionName;
 
     /**

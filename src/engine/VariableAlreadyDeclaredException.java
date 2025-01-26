@@ -8,6 +8,9 @@ public class VariableAlreadyDeclaredException extends Exception {
     private static final String MESSAGE1 = "VariableAlreadyDeclaredException: Variable '";
     private static final String MESSAGE2 = "' already declared in the current scope";
     // Field
+    /**
+     * variable name
+     */
     private final String name;
 
     /**

@@ -13,6 +13,9 @@ public class IllegalConditionException extends Exception {
             + " double or int variable / A double or int constant/value Each one can be separated with " +
             "one \"&&\" or \"||\"";
     private static final String BLOCK_PLACEHOLDER = "{block}";
+    /**
+     * block type
+     */
     private final String blockType;
 
     /**

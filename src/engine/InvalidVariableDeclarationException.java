@@ -7,7 +7,13 @@ public class InvalidVariableDeclarationException extends Exception {
 
     // Fields
     private static final String MESSAGE = "InvalidVariableDeclarationException: Unexpected token '";
+    /**
+     * variable name
+     */
     private final String variableName;
+    /**
+     * current token
+     */
     private final String currentToken;
 
     /**
