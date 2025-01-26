@@ -20,7 +20,6 @@ public class Tokenizer {
     // Regex
     private static final String TOKEN_SPLIT = "(" + SYMBOLS_REGEX + "|\\w+)";
     private static final String IDENTIFIER_PATTERN = "^(?!_+$)(?!__)[a-zA-Z0-9_]*$";
-    private static final String LIST_STRING = "List<String>";
 
     // Fields
     private final String[] inputCleanedLines;
@@ -123,7 +122,6 @@ public class Tokenizer {
     /**
      * Retreats to the saved token
      */
-    @SuppressWarnings(LIST_STRING)
     public void retreat() {
         if (lookAheadBuffer != null) {
             lineIndex = (int) lookAheadBuffer[LINE_INDEX];
