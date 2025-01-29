@@ -323,7 +323,7 @@ public class VerificationEngine {
             InvalidVariableAssignmentException, InnerMethodDeclarationException,
             NonExistingFunctionException, IllegalConditionException,
             EmptyConditionException, NumberOfVarsInFuncCallException, IllegalVarTypeInConditionException,
-            UninitializedVariableInConditionException, IllegalInnerBlockException {
+            UninitializedVariableInConditionException, IllegalInnerBlockException, IllegalReturnFormatException {
 
         String currToken = tokenizer.getCurrentToken();
 
@@ -427,7 +427,7 @@ public class VerificationEngine {
             IllegalVarTypeInConditionException, UninitializedVariableInConditionException,
             InvalidVariableNameException, InvalidValueTypeException, InvalidVariableDeclarationException,
             InnerMethodDeclarationException, ConstantAssignmentException, ConstantNonAssignmentException,
-            UninitializedGlobalVariableException, IllegalInnerBlockException {
+            UninitializedGlobalVariableException, IllegalInnerBlockException, IllegalReturnFormatException {
 
         advanceFor(TWO);
 
@@ -475,13 +475,18 @@ public class VerificationEngine {
             InnerMethodDeclarationException, IllegalConditionException, EmptyConditionException,
             IllegalVarTypeInConditionException, UninitializedVariableInConditionException,
             ConstantNonAssignmentException, UninitializedGlobalVariableException,
-            IllegalInnerBlockException {
+            IllegalInnerBlockException, IllegalReturnFormatException {
 
         String currToken = tokenizer.getCurrentToken();
 
         while (!currToken.equals(BRACE_CLOSING)) {
 
-            verifyInnerPartOfBlock();
+            if (currToken.equals(RETURN)) {
+                // Return statement
+                verifyReturnFormat();
+            } else {
+                verifyInnerPartOfBlock();
+            }
 
             currToken = tokenizer.getCurrentToken();
         }
@@ -574,18 +579,25 @@ public class VerificationEngine {
      * Verifies return format and checks if it is the last one
      * @return - True if it is the last, just before '}', anf False otherwise
      * @throws IllegalReturnFormatException - When the return on the method is in illegal format
-
      */
     private boolean verifyReturnStatement() throws IllegalReturnFormatException {
 
-        tokenizer.advance();
-        if (!tokenizer.getCurrentToken().equals(EOL_COMMA)){
-            throw new IllegalReturnFormatException();
-        }
+        verifyReturnFormat();
 
         // Check last return
         tokenizer.advance();
         return (tokenizer.getCurrentToken().equals(BRACE_CLOSING));
+    }
+
+    /**
+     * Verifies return format
+     * @throws IllegalReturnFormatException - When the return on the method is in illegal format
+     */
+    private void verifyReturnFormat() throws IllegalReturnFormatException {
+        tokenizer.advance();
+        if (!tokenizer.getCurrentToken().equals(EOL_COMMA)){
+            throw new IllegalReturnFormatException();
+        }
     }
 
     /**
